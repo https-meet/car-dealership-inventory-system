@@ -9,3 +9,12 @@ export const register = async (
 
   res.status(response.statusCode).json(response.body);
 };
+
+export const login = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    const response = await authService.loginUser(req.body);
+
+    res.status(response.statusCode).json(response.body);
+};
