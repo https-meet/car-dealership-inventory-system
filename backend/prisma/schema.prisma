@@ -1,13 +1,66 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+enum VehicleCategory {
+  SEDAN
+  SUV
+  HATCHBACK
+  TRUCK
+  COUPE
+  CONVERTIBLE
+  ELECTRIC
+}
+
+model User {
+  id          String     @id @default(uuid())
+  firstName   String
+  lastName    String
+  email       String     @unique
+  password    String
+  role        Role       @default(CUSTOMER)
+
+  purchases   Purchase[]
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model Vehicle {
+  id          String              @id @default(uuid())
+  make        String
+  model       String
+  category    VehicleCategory
+  year        Int
+  price       Decimal
+  quantity    Int
+  imageUrl    String?
+
+  purchases   Purchase[]
+
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model Purchase {
+  id          String    @id @default(uuid())
+  quantity    Int
+
+  userId      String
+  vehicleId   String
+
+  user        User      @relation(fields: [userId], references: [id])
+  vehicle     Vehicle   @relation(fields: [vehicleId], references: [id])
+
+  purchasedAt DateTime  @default(now())
 }
