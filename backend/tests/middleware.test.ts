@@ -1,9 +1,11 @@
 import request from "supertest";
 import app from "../src/app";
 import { prisma } from "../src/config/prisma";
+import { clearDatabase } from "./helpers/test-db";
+
 
 beforeEach(async () => {
-  await prisma.user.deleteMany();
+  await clearDatabase();
 });
 
 describe("Authentication Middleware", () => {

@@ -5,7 +5,6 @@ import { validate } from "../middleware/validation.middleware";
 import { createPurchaseSchema } from "../validators/purchase.validator";
 
 const router = Router();
-console.log("✅ Purchase routes loaded");
 
 router.post(
   "/",
