@@ -1,16 +1,27 @@
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
+import { Role } from "@prisma/client";
+
+interface TokenPayload {
+  id: string;
+  role: Role;
+}
 
 class JwtService {
   private readonly secret = process.env.JWT_SECRET!;
 
-  generateToken(payload: { id: string; role: string }) {
+  generateToken(payload: TokenPayload): string {
     return jwt.sign(payload, this.secret, {
       expiresIn: "1d",
     });
   }
 
-  verifyToken(token: string) {
-    return jwt.verify(token, this.secret);
+  verifyToken(token: string): TokenPayload {
+    const decoded = jwt.verify(token, this.secret) as JwtPayload;
+
+    return {
+      id: decoded.id,
+      role: decoded.role as Role,
+    };
   }
 }
 
