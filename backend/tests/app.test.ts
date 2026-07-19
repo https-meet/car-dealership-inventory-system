@@ -10,7 +10,7 @@ describe("Application", () => {
 
       expect(response.body).toEqual({
         success: true,
-        message: "Car Dealership Inventory API is running 🚗",
+        message: "Car Dealership Inventory API is running",
       });
     });
   });

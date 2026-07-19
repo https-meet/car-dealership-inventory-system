@@ -1,6 +1,11 @@
 import { Vehicle } from "@prisma/client";
 import { vehicleRepository } from "../repositories/vehicle.repository";
-import { CreateVehicleDto, UpdateVehicleDto } from "../types/vehicle.types";
+import {
+  CreateVehicleDto,
+  RestockVehicleDto,
+  SearchVehicleDto,
+  UpdateVehicleDto,
+} from "../types/vehicle.types";
 import { AppError } from "../utils/app-error";
 
 class VehicleService {
@@ -38,6 +43,10 @@ class VehicleService {
 
   async getAll() {
     return vehicleRepository.findAll();
+  }
+
+  async search(query: SearchVehicleDto) {
+    return vehicleRepository.search(query);
   }
 
   async getById(id: string) {
@@ -83,6 +92,16 @@ class VehicleService {
     }
 
     await vehicleRepository.delete(id);
+  }
+
+  async restock(id: string, data: RestockVehicleDto) {
+    const vehicle = await vehicleRepository.findById(id);
+
+    if (!vehicle) {
+      throw new AppError(404, "Vehicle not found.");
+    }
+
+    return vehicleRepository.incrementStock(id, data.quantity);
   }
 }
 

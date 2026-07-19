@@ -24,6 +24,7 @@ describe("Authentication API", () => {
         });
 
       expect(response.status).toBe(201);
+      expect(response.body.user.password).toBeUndefined();
 
       const user = await prisma.user.findUnique({
         where: {

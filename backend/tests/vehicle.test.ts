@@ -69,15 +69,77 @@ describe("Vehicle API", () => {
         ],
       });
 
-      const response = await request(app).get("/api/vehicles");
+      const response = await request(app)
+        .get("/api/vehicles")
+        .set("Authorization", `Bearer ${customerToken}`);
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
 
       expect(response.body.data).toHaveLength(2);
 
-      expect(response.body.data[0].make).toBe("Toyota");
-      expect(response.body.data[1].make).toBe("Honda");
+      expect(response.body.data.map((v: { make: string }) => v.make)).toEqual([
+        "Honda",
+        "Toyota",
+      ]);
+    });
+
+    it("should reject request without token", async () => {
+      const response = await request(app).get("/api/vehicles");
+
+      expect(response.status).toBe(401);
+    });
+  });
+
+  describe("GET /api/vehicles/search", () => {
+    beforeEach(async () => {
+      await prisma.vehicle.createMany({
+        data: [
+          {
+            make: "Toyota",
+            model: "Camry",
+            category: VehicleCategory.SEDAN,
+            year: 2023,
+            price: 25000,
+            quantity: 5,
+          },
+          {
+            make: "Tesla",
+            model: "Model 3",
+            category: VehicleCategory.ELECTRIC,
+            year: 2024,
+            price: 42000,
+            quantity: 2,
+          },
+        ],
+      });
+    });
+
+    it("should search by category and price range", async () => {
+      const response = await request(app)
+        .get("/api/vehicles/search")
+        .query({
+          category: VehicleCategory.ELECTRIC,
+          minPrice: 40000,
+          maxPrice: 50000,
+        })
+        .set("Authorization", `Bearer ${customerToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0].make).toBe("Tesla");
+    });
+
+    it("should reject invalid price range", async () => {
+      const response = await request(app)
+        .get("/api/vehicles/search")
+        .query({
+          minPrice: 50000,
+          maxPrice: 40000,
+        })
+        .set("Authorization", `Bearer ${customerToken}`);
+
+      expect(response.status).toBe(400);
     });
   });
 
@@ -94,7 +156,9 @@ describe("Vehicle API", () => {
         },
       });
 
-      const response = await request(app).get(`/api/vehicles/${vehicle.id}`);
+      const response = await request(app)
+        .get(`/api/vehicles/${vehicle.id}`)
+        .set("Authorization", `Bearer ${customerToken}`);
 
       expect(response.status).toBe(200);
 
@@ -107,9 +171,17 @@ describe("Vehicle API", () => {
     it("should return 404 when vehicle does not exist", async () => {
       const response = await request(app).get(
         "/api/vehicles/00000000-0000-0000-0000-000000000000",
-      );
+      ).set("Authorization", `Bearer ${customerToken}`);
 
       expect(response.status).toBe(404);
+    });
+
+    it("should reject request without token", async () => {
+      const response = await request(app).get(
+        "/api/vehicles/00000000-0000-0000-0000-000000000000",
+      );
+
+      expect(response.status).toBe(401);
     });
   });
 
@@ -209,7 +281,7 @@ describe("Vehicle API", () => {
           price: 100,
         });
 
-      expect([400, 404]).toContain(response.status);
+      expect(response.status).toBe(400);
     });
 
     it("should reject customer", async () => {
@@ -318,7 +390,98 @@ describe("Vehicle API", () => {
         .delete("/api/vehicles/invalid-id")
         .set("Authorization", `Bearer ${adminToken}`);
 
-      expect([400, 404]).toContain(response.status);
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe("POST /api/vehicles/:id/purchase", () => {
+    it("should create purchase and decrement stock", async () => {
+      const vehicle = await prisma.vehicle.create({
+        data: {
+          make: "Tata",
+          model: "Nexon EV",
+          category: VehicleCategory.ELECTRIC,
+          year: 2024,
+          price: 22000,
+          quantity: 4,
+        },
+      });
+
+      const response = await request(app)
+        .post(`/api/vehicles/${vehicle.id}/purchase`)
+        .set("Authorization", `Bearer ${customerToken}`)
+        .send({ quantity: 2 });
+
+      expect(response.status).toBe(201);
+
+      const updated = await prisma.vehicle.findUnique({
+        where: { id: vehicle.id },
+      });
+
+      expect(updated?.quantity).toBe(2);
+    });
+
+    it("should reject purchase above available stock", async () => {
+      const vehicle = await prisma.vehicle.create({
+        data: {
+          make: "Tata",
+          model: "Punch",
+          category: VehicleCategory.SUV,
+          year: 2024,
+          price: 16000,
+          quantity: 1,
+        },
+      });
+
+      const response = await request(app)
+        .post(`/api/vehicles/${vehicle.id}/purchase`)
+        .set("Authorization", `Bearer ${customerToken}`)
+        .send({ quantity: 2 });
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe("POST /api/vehicles/:id/restock", () => {
+    it("should allow admin to restock vehicle", async () => {
+      const vehicle = await prisma.vehicle.create({
+        data: {
+          make: "Toyota",
+          model: "Hilux",
+          category: VehicleCategory.TRUCK,
+          year: 2024,
+          price: 38000,
+          quantity: 2,
+        },
+      });
+
+      const response = await request(app)
+        .post(`/api/vehicles/${vehicle.id}/restock`)
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send({ quantity: 3 });
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.quantity).toBe(5);
+    });
+
+    it("should reject customer restock", async () => {
+      const vehicle = await prisma.vehicle.create({
+        data: {
+          make: "Toyota",
+          model: "Hilux",
+          category: VehicleCategory.TRUCK,
+          year: 2024,
+          price: 38000,
+          quantity: 2,
+        },
+      });
+
+      const response = await request(app)
+        .post(`/api/vehicles/${vehicle.id}/restock`)
+        .set("Authorization", `Bearer ${customerToken}`)
+        .send({ quantity: 3 });
+
+      expect(response.status).toBe(403);
     });
   });
 });

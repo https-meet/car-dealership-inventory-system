@@ -19,3 +19,15 @@ export interface UpdateVehicleDto {
     quantity?: number;
     imageUrl?: string;
 }
+
+export interface SearchVehicleDto {
+  make?: string;
+  model?: string;
+  category?: VehicleCategory;
+  minPrice?: number;
+  maxPrice?: number;
+}
+
+export interface RestockVehicleDto {
+  quantity: number;
+}

@@ -1,7 +1,11 @@
 import { Vehicle } from "@prisma/client";
 import { prisma } from "../config/prisma";
 import { IVehicleRepository } from "./interfaces/vehicle.repository.interface";
-import { CreateVehicleDto, UpdateVehicleDto } from "../types/vehicle.types";
+import {
+  CreateVehicleDto,
+  SearchVehicleDto,
+  UpdateVehicleDto,
+} from "../types/vehicle.types";
 
 export class VehicleRepository implements IVehicleRepository {
   async create(data: CreateVehicleDto): Promise<Vehicle> {
@@ -13,7 +17,37 @@ export class VehicleRepository implements IVehicleRepository {
   async findAll(): Promise<Vehicle[]> {
     return prisma.vehicle.findMany({
       orderBy: {
-        createdAt: "desc",
+        make: "asc",
+      },
+    });
+  }
+
+  async search(query: SearchVehicleDto): Promise<Vehicle[]> {
+    return prisma.vehicle.findMany({
+      where: {
+        make: query.make
+          ? {
+              contains: query.make,
+              mode: "insensitive",
+            }
+          : undefined,
+        model: query.model
+          ? {
+              contains: query.model,
+              mode: "insensitive",
+            }
+          : undefined,
+        category: query.category,
+        price:
+          query.minPrice !== undefined || query.maxPrice !== undefined
+            ? {
+                gte: query.minPrice,
+                lte: query.maxPrice,
+              }
+            : undefined,
+      },
+      orderBy: {
+        make: "asc",
       },
     });
   }
@@ -56,6 +90,17 @@ export class VehicleRepository implements IVehicleRepository {
       where: { id },
       data: {
         quantity,
+      },
+    });
+  }
+
+  async incrementStock(id: string, quantity: number): Promise<Vehicle> {
+    return prisma.vehicle.update({
+      where: { id },
+      data: {
+        quantity: {
+          increment: quantity,
+        },
       },
     });
   }
