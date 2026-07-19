@@ -4,13 +4,17 @@ import { Search, Plus, Car } from "lucide-react";
 import VehicleTable from "../features/vehicles/VehicleTable";
 import VehicleForm from "../features/vehicles/VehicleForm";
 import EditVehicleModal from "../features/vehicles/EditVehicleModal";
+import PurchaseVehicleModal from "../features/purchases/PurchaseVehicleModal";
 import Modal from "../components/ui/Modal";
 import { getVehicles } from "../services/vehicle.service";
+import { useIsAdmin } from "../hooks/useAuth";
 import type { Vehicle } from "../types/vehicle";
 
 export default function VehiclesPage() {
+  const isAdmin = useIsAdmin();
   const [search, setSearch] = useState("");
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  const [buyingVehicle, setBuyingVehicle] = useState<Vehicle | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   const { data, isLoading, isError } = useQuery({
@@ -43,13 +47,15 @@ export default function VehiclesPage() {
           </div>
         </div>
 
-        <button
-          onClick={() => setIsAddOpen(true)}
-          className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
-        >
-          <Plus size={16} />
-          Add Vehicle
-        </button>
+        {isAdmin && (
+          <button
+            onClick={() => setIsAddOpen(true)}
+            className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors"
+          >
+            <Plus size={16} />
+            Add Vehicle
+          </button>
+        )}
       </div>
 
       {/* Search */}
@@ -79,7 +85,8 @@ export default function VehiclesPage() {
       ) : (
         <VehicleTable
           vehicles={filteredVehicles}
-          onEdit={setEditingVehicle}
+          onEdit={isAdmin ? setEditingVehicle : undefined}
+          onBuy={!isAdmin ? setBuyingVehicle : undefined}
         />
       )}
 
@@ -95,10 +102,16 @@ export default function VehiclesPage() {
         />
       </Modal>
 
-      {/* Edit Vehicle Modal */}
+      {/* Edit Vehicle Modal (ADMIN only) */}
       <EditVehicleModal
         vehicle={editingVehicle}
         onClose={() => setEditingVehicle(null)}
+      />
+
+      {/* Purchase Vehicle Modal (CUSTOMER only) */}
+      <PurchaseVehicleModal
+        vehicle={buyingVehicle}
+        onClose={() => setBuyingVehicle(null)}
       />
     </div>
   );

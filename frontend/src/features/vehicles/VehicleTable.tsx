@@ -1,16 +1,17 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, ShoppingCart } from "lucide-react";
 import type { Vehicle } from "../../types/vehicle";
 import StockBadge from "../../components/ui/Badge";
 import { deleteVehicle } from "../../services/vehicle.service";
 
 interface Props {
   vehicles: Vehicle[];
-  onEdit: (vehicle: Vehicle) => void;
+  onEdit?: (vehicle: Vehicle) => void;   // ADMIN only
+  onBuy?: (vehicle: Vehicle) => void;    // CUSTOMER only
 }
 
-export default function VehicleTable({ vehicles, onEdit }: Props) {
+export default function VehicleTable({ vehicles, onEdit, onBuy }: Props) {
   const queryClient = useQueryClient();
 
   const deleteMutation = useMutation({
@@ -81,24 +82,42 @@ export default function VehicleTable({ vehicles, onEdit }: Props) {
 
               <td className="px-5 py-4">
                 <div className="flex items-center justify-center gap-2">
-                  <button
-                    onClick={() => onEdit(vehicle)}
-                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 transition-colors"
-                    title="Edit vehicle"
-                  >
-                    <Pencil size={14} />
-                    Edit
-                  </button>
+                  {/* ADMIN actions */}
+                  {onEdit && (
+                    <button
+                      onClick={() => onEdit(vehicle)}
+                      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50 transition-colors"
+                      title="Edit vehicle"
+                    >
+                      <Pencil size={14} />
+                      Edit
+                    </button>
+                  )}
 
-                  <button
-                    onClick={() => handleDelete(vehicle)}
-                    disabled={deleteMutation.isPending}
-                    className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
-                    title="Delete vehicle"
-                  >
-                    <Trash2 size={14} />
-                    Delete
-                  </button>
+                  {onEdit && (
+                    <button
+                      onClick={() => handleDelete(vehicle)}
+                      disabled={deleteMutation.isPending}
+                      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                      title="Delete vehicle"
+                    >
+                      <Trash2 size={14} />
+                      Delete
+                    </button>
+                  )}
+
+                  {/* CUSTOMER action */}
+                  {onBuy && (
+                    <button
+                      onClick={() => onBuy(vehicle)}
+                      disabled={vehicle.quantity === 0}
+                      className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      title={vehicle.quantity === 0 ? "Out of stock" : "Buy this vehicle"}
+                    >
+                      <ShoppingCart size={14} />
+                      {vehicle.quantity === 0 ? "Sold Out" : "Buy"}
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>
