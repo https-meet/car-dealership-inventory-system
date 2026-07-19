@@ -1,5 +1,6 @@
 import { DollarSign, ShoppingBag, Receipt } from "lucide-react";
 import type { SalesSummary } from "../../types/report";
+import { formatCurrency, formatNumber } from "../../utils/format";
 
 interface Props {
   summary: SalesSummary;
@@ -8,7 +9,7 @@ interface Props {
 const stats = (summary: SalesSummary) => [
   {
     label: "Total Revenue",
-    value: `₹${Number(summary.totalRevenue).toLocaleString("en-IN")}`,
+    value: formatCurrency(summary.totalRevenue),
     icon: DollarSign,
     color: "text-emerald-600",
     bg: "bg-emerald-50",
@@ -16,7 +17,7 @@ const stats = (summary: SalesSummary) => [
   },
   {
     label: "Units Sold",
-    value: summary.totalUnitsSold.toLocaleString("en-IN"),
+    value: formatNumber(summary.totalUnitsSold),
     icon: ShoppingBag,
     color: "text-blue-600",
     bg: "bg-blue-50",
@@ -24,7 +25,7 @@ const stats = (summary: SalesSummary) => [
   },
   {
     label: "Total Transactions",
-    value: summary.totalPurchases.toLocaleString("en-IN"),
+    value: formatNumber(summary.totalPurchases),
     icon: Receipt,
     color: "text-violet-600",
     bg: "bg-violet-50",

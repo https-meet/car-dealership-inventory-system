@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import { formatNumber } from "../../utils/format";
 
 type ColorTheme = "blue" | "violet" | "emerald" | "amber" | "rose";
 
@@ -38,7 +39,7 @@ export default function DashboardCard({
             {title}
           </p>
           <p className="mt-3 text-3xl font-extrabold text-slate-800">
-            {value.toLocaleString("en-IN")}
+            {formatNumber(value)}
             {suffix && (
               <span className="ml-1 text-base font-medium text-slate-400">
                 {suffix}
@@ -53,4 +54,5 @@ export default function DashboardCard({
       </div>
     </div>
   );
-}
+}
+

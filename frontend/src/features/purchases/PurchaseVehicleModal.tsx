@@ -7,6 +7,7 @@ import { ShoppingCart } from "lucide-react";
 import Modal from "../../components/ui/Modal";
 import { createPurchase } from "../../services/purchase.service";
 import type { Vehicle } from "../../types/vehicle";
+import { formatCurrency, titleCase } from "../../utils/format";
 
 const schema = z.object({
   quantity: z.coerce
@@ -94,12 +95,10 @@ export default function PurchaseVehicleModal({
                 {vehicle.make} {vehicle.model}
               </p>
               <p className="mt-0.5 text-xs text-slate-500">
-                {vehicle.year} ·{" "}
-                {vehicle.category.charAt(0) +
-                  vehicle.category.slice(1).toLowerCase()}
+                {vehicle.year} · {titleCase(vehicle.category)}
               </p>
               <p className="mt-2 text-lg font-bold text-blue-600">
-                ₹{unitPrice.toLocaleString("en-IN")}
+                {formatCurrency(unitPrice)}
                 <span className="ml-1 text-xs font-normal text-slate-400">
                   per unit
                 </span>
@@ -152,7 +151,7 @@ export default function PurchaseVehicleModal({
                   Estimated Total
                 </span>
                 <span className="text-lg font-bold text-blue-700">
-                  ₹{estimatedTotal.toLocaleString("en-IN")}
+                  {formatCurrency(estimatedTotal)}
                 </span>
               </div>
             )}

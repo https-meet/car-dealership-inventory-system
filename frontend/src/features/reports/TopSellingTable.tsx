@@ -1,5 +1,6 @@
 import { Trophy } from "lucide-react";
 import type { TopSellingEntry } from "../../types/report";
+import { formatCurrency, titleCase } from "../../utils/format";
 
 interface Props {
   entries: TopSellingEntry[];
@@ -67,12 +68,10 @@ export default function TopSellingTable({ entries }: Props) {
                   )}
                 </td>
                 <td className="px-5 py-4 text-slate-600">
-                  {v
-                    ? v.category.charAt(0) + v.category.slice(1).toLowerCase()
-                    : "—"}
+                  {v ? titleCase(v.category) : "—"}
                 </td>
                 <td className="px-5 py-4 text-slate-700">
-                  {v ? `₹${Number(v.price).toLocaleString("en-IN")}` : "—"}
+                  {v ? formatCurrency(v.price) : "—"}
                 </td>
                 <td className="px-5 py-4">
                   <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
@@ -80,9 +79,7 @@ export default function TopSellingTable({ entries }: Props) {
                   </span>
                 </td>
                 <td className="px-5 py-4 font-semibold text-emerald-700">
-                  {revenue > 0
-                    ? `₹${revenue.toLocaleString("en-IN")}`
-                    : "—"}
+                  {revenue > 0 ? formatCurrency(revenue) : "—"}
                 </td>
               </tr>
             );
@@ -92,3 +89,4 @@ export default function TopSellingTable({ entries }: Props) {
     </div>
   );
 }
+

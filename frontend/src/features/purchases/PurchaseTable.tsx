@@ -1,6 +1,7 @@
 import { ShoppingBag } from "lucide-react";
 import type { Purchase } from "../../types/purchase";
 import type { Vehicle } from "../../types/vehicle";
+import { formatCurrency, formatDate, formatTime, titleCase } from "../../utils/format";
 
 interface Props {
   purchases: Purchase[];
@@ -71,16 +72,11 @@ export default function PurchaseTable({
                 </td>
 
                 <td className="px-5 py-4 text-slate-600">
-                  {vehicle
-                    ? vehicle.category.charAt(0) +
-                      vehicle.category.slice(1).toLowerCase()
-                    : "—"}
+                  {vehicle ? titleCase(vehicle.category) : "—"}
                 </td>
 
                 <td className="px-5 py-4 text-slate-700">
-                  {unitPrice > 0
-                    ? `₹${unitPrice.toLocaleString("en-IN")}`
-                    : "—"}
+                  {unitPrice > 0 ? formatCurrency(unitPrice) : "—"}
                 </td>
 
                 <td className="px-5 py-4">
@@ -90,7 +86,7 @@ export default function PurchaseTable({
                 </td>
 
                 <td className="px-5 py-4 font-semibold text-slate-800">
-                  {total > 0 ? `₹${total.toLocaleString("en-IN")}` : "—"}
+                  {total > 0 ? formatCurrency(total) : "—"}
                 </td>
 
                 {showCustomer && (
@@ -102,17 +98,10 @@ export default function PurchaseTable({
                 )}
 
                 <td className="px-5 py-4 text-xs text-slate-500">
-                  {new Date(purchase.purchasedAt).toLocaleDateString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
+                  {formatDate(purchase.purchasedAt)}
                   <br />
                   <span className="text-slate-400">
-                    {new Date(purchase.purchasedAt).toLocaleTimeString(
-                      "en-IN",
-                      { hour: "2-digit", minute: "2-digit" }
-                    )}
+                    {formatTime(purchase.purchasedAt)}
                   </span>
                 </td>
               </tr>

@@ -1,5 +1,6 @@
 import { AlertTriangle } from "lucide-react";
 import type { LowStockVehicle } from "../../types/report";
+import { formatCurrency, titleCase } from "../../utils/format";
 
 interface Props {
   vehicles: LowStockVehicle[];
@@ -41,10 +42,10 @@ export default function LowStockTable({ vehicles }: Props) {
                 </p>
               </td>
               <td className="px-5 py-4 text-slate-600">
-                {v.category.charAt(0) + v.category.slice(1).toLowerCase()}
+                {titleCase(v.category)}
               </td>
               <td className="px-5 py-4 font-medium text-slate-700">
-                ₹{Number(v.price).toLocaleString("en-IN")}
+                {formatCurrency(v.price)}
               </td>
               <td className="px-5 py-4">
                 <span
@@ -61,3 +62,4 @@ export default function LowStockTable({ vehicles }: Props) {
     </div>
   );
 }
+

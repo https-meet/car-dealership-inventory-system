@@ -1,5 +1,6 @@
 import { Clock } from "lucide-react";
 import type { RecentPurchase } from "../../types/report";
+import { formatCurrency, formatDate, formatTime, titleCase } from "../../utils/format";
 
 interface Props {
   purchases: RecentPurchase[];
@@ -43,8 +44,7 @@ export default function RecentPurchasesTable({ purchases }: Props) {
                     {p.vehicle.make} {p.vehicle.model}
                   </p>
                   <p className="text-xs text-slate-400">
-                    {p.vehicle.category.charAt(0) +
-                      p.vehicle.category.slice(1).toLowerCase()}
+                    {titleCase(p.vehicle.category)}
                   </p>
                 </td>
                 <td className="px-5 py-4">
@@ -53,20 +53,13 @@ export default function RecentPurchasesTable({ purchases }: Props) {
                   </span>
                 </td>
                 <td className="px-5 py-4 font-semibold text-slate-800">
-                  ₹{total.toLocaleString("en-IN")}
+                  {formatCurrency(total)}
                 </td>
                 <td className="px-5 py-4 text-xs text-slate-500">
-                  {new Date(p.purchasedAt).toLocaleDateString("en-IN", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
+                  {formatDate(p.purchasedAt)}
                   <br />
                   <span className="text-slate-400">
-                    {new Date(p.purchasedAt).toLocaleTimeString("en-IN", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {formatTime(p.purchasedAt)}
                   </span>
                 </td>
               </tr>
@@ -77,3 +70,4 @@ export default function RecentPurchasesTable({ purchases }: Props) {
     </div>
   );
 }
+

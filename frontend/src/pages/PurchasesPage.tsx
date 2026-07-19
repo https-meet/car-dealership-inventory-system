@@ -4,6 +4,7 @@ import PurchaseTable from "../features/purchases/PurchaseTable";
 import { getPurchases } from "../services/purchase.service";
 import { getVehicles } from "../services/vehicle.service";
 import { useAuth, useIsAdmin } from "../hooks/useAuth";
+import { formatCurrency } from "../utils/format";
 
 export default function PurchasesPage() {
   const user = useAuth();
@@ -95,7 +96,7 @@ export default function PurchasesPage() {
                 {isAdmin ? "Total Revenue" : "Total Spent"}
               </p>
               <p className="mt-0.5 text-2xl font-bold text-slate-800">
-                ₹{totalSpend.toLocaleString("en-IN")}
+                {formatCurrency(totalSpend)}
               </p>
             </div>
           </div>

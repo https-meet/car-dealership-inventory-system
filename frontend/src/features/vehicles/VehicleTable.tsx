@@ -4,6 +4,7 @@ import { Pencil, Trash2, ShoppingCart } from "lucide-react";
 import type { Vehicle } from "../../types/vehicle";
 import StockBadge from "../../components/ui/Badge";
 import { deleteVehicle } from "../../services/vehicle.service";
+import { formatCurrency, titleCase } from "../../utils/format";
 
 interface Props {
   vehicles: Vehicle[];
@@ -69,11 +70,11 @@ export default function VehicleTable({ vehicles, onEdit, onBuy }: Props) {
                 <p className="text-xs text-slate-400">{vehicle.model}</p>
               </td>
               <td className="px-5 py-4 text-slate-600">
-                {vehicle.category.charAt(0) + vehicle.category.slice(1).toLowerCase()}
+                {titleCase(vehicle.category)}
               </td>
               <td className="px-5 py-4 text-slate-600">{vehicle.year}</td>
-              <td className="px-5 py-4 font-medium text-slate-700">
-                ₹{Number(vehicle.price).toLocaleString("en-IN")}
+              <td className="px-5 py-4 text-slate-700 font-medium">
+                {formatCurrency(vehicle.price)}
               </td>
               <td className="px-5 py-4 text-slate-600">{vehicle.quantity}</td>
               <td className="px-5 py-4">
