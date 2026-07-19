@@ -153,6 +153,7 @@ JWT_SECRET="replace-this-with-a-long-secure-secret"
 cd backend
 npm install
 npx prisma migrate dev
+npm run seed
 npm run dev
 ```
 
@@ -166,6 +167,13 @@ Health check:
 
 ```text
 GET http://localhost:3000/api/health
+```
+
+The seed command adds demo users and a showroom-ready vehicle catalog:
+
+```text
+Admin:    admin@dealership.com / password123
+Customer: customer@dealership.com / password123
 ```
 
 ### Step 4: Install and Run Frontend
@@ -200,6 +208,7 @@ http://localhost:5173
 - View dashboard statistics.
 - Browse all vehicles.
 - Search/filter by make, model, category, and price range.
+- View seeded demo vehicles immediately after local setup.
 - Purchase available vehicles.
 - Cannot purchase vehicles with zero stock.
 - View personal purchase history.

@@ -7,7 +7,7 @@ export default function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen overflow-hidden bg-[linear-gradient(135deg,#f8fafc_0%,#f5f5f4_48%,#eef6f1_100%)] text-slate-950">
+    <div className="app-bg flex min-h-screen overflow-hidden text-slate-950">
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}

@@ -66,18 +66,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-slate-200 bg-white px-3 py-4 shadow-xl shadow-slate-950/10 transition-transform duration-300 md:static md:translate-x-0 md:shadow-none ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-white/80 bg-white/85 px-3 py-4 shadow-xl shadow-slate-950/10 backdrop-blur-xl transition-transform duration-300 md:static md:translate-x-0 md:shadow-none ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         <div className="mb-5 flex items-center justify-between px-2">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-slate-950 text-white">
+            <div className="mesh-panel flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-lg shadow-teal-950/20">
               <Store size={21} />
             </div>
             <div>
-              <p className="text-sm font-bold text-slate-950">DealerDrive</p>
-              <p className="text-xs font-medium text-slate-500">Inventory system</p>
+              <p className="text-sm font-bold text-slate-950">Kata Inventory</p>
+              <p className="text-xs font-medium text-slate-500">Car dealership</p>
             </div>
           </div>
 
@@ -114,7 +114,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         </nav>
 
         {user && (
-          <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-3">
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/80 p-3">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-sm font-bold uppercase text-slate-800 shadow-sm">
                 {user.firstName[0]}

@@ -42,7 +42,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
         aria-label="Close modal backdrop"
       />
 
-      <div className="relative z-10 flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-lg bg-white shadow-2xl shadow-slate-950/20">
+      <div className="relative z-10 flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl shadow-slate-950/20">
         <div className="flex items-center justify-between gap-4 border-b border-slate-200 px-5 py-4">
           <h2 id="modal-title" className="text-base font-bold text-slate-950">
             {title}

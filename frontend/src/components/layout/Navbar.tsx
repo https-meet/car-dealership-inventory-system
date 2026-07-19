@@ -36,7 +36,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
 
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-700">
-              DealerDrive
+              Kata Inventory
             </p>
             <h1 className="truncate text-base font-semibold text-slate-950 sm:text-lg">
               {title}

@@ -41,7 +41,7 @@ export default function PurchaseTable({
           const total = unitPrice * purchase.quantity;
 
           return (
-            <article key={purchase.id} className="surface p-4">
+            <article key={purchase.id} className="premium-surface p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-slate-950">
@@ -83,7 +83,7 @@ export default function PurchaseTable({
         })}
       </div>
 
-      <div className="surface hidden overflow-hidden md:block">
+      <div className="premium-surface hidden overflow-hidden md:block">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">

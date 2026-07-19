@@ -25,7 +25,7 @@ export default function DashboardCard({
   suffix,
 }: DashboardCardProps) {
   return (
-    <div className="surface p-5 transition hover:-translate-y-0.5 hover:shadow-md">
+    <div className="premium-surface p-5 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-teal-950/10">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-slate-500">{title}</p>
@@ -42,7 +42,7 @@ export default function DashboardCard({
         </div>
 
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ring-1 ${tones[tone]}`}
+          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ring-1 ${tones[tone]}`}
         >
           <Icon size={19} strokeWidth={2.2} />
         </div>

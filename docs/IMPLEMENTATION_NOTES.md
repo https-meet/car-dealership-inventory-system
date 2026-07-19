@@ -11,6 +11,7 @@ This project follows the kata PDF requirements: a protected REST API, a database
 - Purchases can be made through both `POST /api/purchases` and the kata endpoint `POST /api/vehicles/:id/purchase`.
 - Purchase stock decrement happens inside a Prisma transaction using a conditional update, so stock cannot go below zero under concurrent requests.
 - Restocking uses `POST /api/vehicles/:id/restock` and increments stock for admins only.
+- `backend/prisma/seed.ts` creates demo users and vehicles. It updates matching make/model/year vehicles instead of creating duplicates.
 
 ## Frontend Flow
 
@@ -36,3 +37,5 @@ npm run build
 ```
 
 Frontend build note: `npm run build` writes generated production files to `frontend/dist`. The folder is ignored by `frontend/.gitignore`, so it is useful for verification but should not be committed. If you only want a quick frontend check without generated output, run `npm run lint`; run the build before final submission or deployment checks.
+
+Seed data note: run `cd backend && npm run seed` after migrations when you want demo users and showroom vehicles in a local database.

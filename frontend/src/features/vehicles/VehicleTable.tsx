@@ -44,7 +44,7 @@ export default function VehicleTable({ vehicles, onEdit, onBuy }: Props) {
           const isOutOfStock = vehicle.quantity === 0;
 
           return (
-            <article key={vehicle.id} className="surface p-4">
+            <article key={vehicle.id} className="premium-surface p-4">
               <div className="flex gap-3">
                 {vehicle.imageUrl ? (
                   <img
@@ -118,7 +118,7 @@ export default function VehicleTable({ vehicles, onEdit, onBuy }: Props) {
         })}
       </div>
 
-      <div className="surface hidden overflow-hidden md:block">
+      <div className="premium-surface hidden overflow-hidden md:block">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">

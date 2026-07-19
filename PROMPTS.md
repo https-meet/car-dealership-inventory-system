@@ -1,112 +1,283 @@
-# AI Conversation and Prompt History (`PROMPTS.md`)
+# AI Conversation & Prompt History (`PROMPTS.md`)
 
-This file records the entire chronological prompt history and interaction steps between the developer and the AI assistant (**Antigravity**) during the implementation of the Car Dealership Inventory System.
+## Overview
 
----
+This document records the major prompts and development instructions provided to the AI assistant during the implementation of the **DealerDrive – Car Dealership Inventory System**.
 
-## 🛠 Phase 1: Project Initiation & Codebase Discovery
-
-### Prompt 1
-> **User:** (Initial instructions detailing the full-stack system layout, Completed Backend setup, Frontend scaffolding, constraints regarding database structures, TypeScript guidelines, Tailwind-only styling rules, TDD and commit workflows, and the scope of Features 2–5.)
-
-### Action & Staging
-* **AI Analysis:** Discovered existing files and backend routes.
-* **Result:** Formulated a detailed `implementation_plan.md` and created the `task.md` tracker mapping out Feature 2 (Vehicle Management) through Feature 5 (UI Polish).
+The AI assistant was used as a development aid for planning, code scaffolding, debugging, refactoring, documentation, and UI improvements. Final architectural decisions, project integration, testing, debugging, and validation were performed by the developer.
 
 ---
 
-## 🚗 Phase 2: Feature 2 — Vehicle Management Module
+# AI Usage Policy
 
-### Prompt 2
-> **User:** continue
+The AI assistant was used to assist with:
 
-### Action & Staging
-* **AI Action:** 
-  1. Identified that `/vehicles` was outside the routing guard in `AppRoutes.tsx` and moved it into `ProtectedRoute`.
-  2. Implemented `getVehicleById`, `updateVehicle`, and `deleteVehicle` endpoints inside `vehicle.service.ts`.
-  3. Created a reusable and accessible overlay component: `Modal.tsx`.
-  4. Created `Badge.tsx` (`StockBadge`) for vehicle list rendering.
-  5. Rewrote `VehicleForm.tsx` to add full edit mode, category validations mapping to Prisma enums, and image URL cleanup logic.
-  6. Created `EditVehicleModal.tsx` and integrated it with row action triggers in `VehicleTable.tsx`.
-  7. Updated `VehiclesPage.tsx` with search state management.
-  8. Created compilation placeholder routes for `/purchases` and `/reports` (`PurchasesPage.tsx` and `ReportsPage.tsx`).
-  9. Executed `npx tsc --noEmit` to confirm 100% compilation safety.
+- Project planning
+- Code scaffolding
+- TypeScript type generation
+- React component generation
+- Backend integration guidance
+- API consumption
+- UI improvements
+- Refactoring suggestions
+- Debugging assistance
+- Documentation
+- Conventional commit generation
 
----
-
-## 💻 Phase 3: Git Commit Styling
-
-### Prompt 3
-> **User:** make the commit like git commit -m "feat: Implement user registration endpoint
-> Used an AI assistant to generate the initial boilerplate for the
-> controller and service, then manually added validation logic.
-> Co-authored-by: AI Tool Name <AI@users.noreply.github.com>"
-
-### Action & Staging
-* **AI Action:** Prompted the user with the exact multi-line command to execute from the command line root.
+The AI was **not** used to blindly generate the entire project. Every generated solution was reviewed, modified when necessary, integrated into the existing architecture, tested, and validated before being accepted.
 
 ---
 
-## 🛒 Phase 4: Feature 3 — Purchase Management Module
-
-### Prompt 4
-> **User:** continue
-
-### Action & Staging
-* **AI Action:**
-  1. Created `src/types/purchase.ts` detailing raw `Purchase` models and DTO structures.
-  2. Implemented the API service calls in `src/services/purchase.service.ts`.
-  3. Created a custom authentication hook, `useAuth.ts`, to check current user roles (`useIsAdmin`, `useIsCustomer`).
-  4. Built `PurchaseTable.tsx` with list lookups, unit price caching, and formatting.
-  5. Built `PurchaseVehicleModal.tsx` featuring estimated price multiplier calculations that update live.
-  6. Replaced `PurchasesPage.tsx` stub with a role-based summary page displaying cards for Total Revenue (Admin) vs Total Spend (Customer).
-  7. Integrated a **Buy** button in `VehicleTable.tsx` visible to customers, and bound it to the purchase flow in `VehiclesPage.tsx`.
+# Development Timeline
 
 ---
 
-## 📊 Phase 5: Feature 4 — Reports Dashboard
+# Phase 1 — Project Discovery & Planning
 
-### Prompt 5
-> **User:** continue
+## Developer Prompt
 
-### Action & Staging
-* **AI Action:**
-  1. Staged `src/types/report.ts` defining shapes for low stock alerts, recent transactions, top selling statistics, and general sales metrics.
-  2. Implemented `src/services/report.service.ts` forwarding parameters (such as `limit` or `threshold`).
-  3. Built `SalesSummaryCard.tsx` rendering KPIs for Revenue, Units Sold, and Transactions.
-  4. Built `LowStockTable.tsx` styling low stock items with danger colors.
-  5. Built `RecentPurchasesTable.tsx` detailing customer emails, purchased items, and dates.
-  6. Built `TopSellingTable.tsx` with custom rank badges for gold, silver, and bronze positions.
-  7. Implemented `ReportsPage.tsx` using `@tanstack/react-query`'s `useQueries` hook to load all reports in parallel.
-  8. Configured `Sidebar.tsx` using user role guards to hide `/reports` from customers.
+> Analyze the existing full-stack project before generating any code. Understand the current architecture, backend APIs, folder structure, coding conventions, and project constraints. Produce an implementation plan without modifying existing backend logic.
 
----
+## Objectives
 
-## 🎨 Phase 6: Feature 5 — UI Polish & Responsive Design
+- Understand backend architecture
+- Inspect existing APIs
+- Review project structure
+- Plan frontend implementation
+- Preserve existing backend code
 
-### Prompt 6
-> **User:** continue
+## AI Contribution
 
-### Action & Staging
-* **AI Action:**
-  1. Restyled `src/index.css` by importing the Google Font **Inter** and implementing fadeIn / fadeUp utility animations.
-  2. Restyled `LoginForm.tsx` adding eye icons for password visibility toggling, a spinning animation during submit events, and a greeting notification.
-  3. Modified `LoginPage.tsx` into a high-fidelity split-panel layout containing value proposition descriptions on the left and input forms on the right.
-  4. Added top accent colors and elevation states to `DashboardCard.tsx`.
-  5. Updated `DashboardPage.tsx` adding greetings matching time-of-day, role subtitles, and skeleton loading grids.
-  6. Staged responsive container margins inside `DashboardLayout.tsx`.
+- Analyzed project structure
+- Reviewed backend routes
+- Reviewed Prisma models
+- Created implementation roadmap
+- Organized development into feature-based milestones
 
 ---
 
-## 💅 Phase 7: Design Upgrades & Refinements
+# Phase 2 — Vehicle Management Module
 
-### Prompt 7
-> **User:** now continue to make design morden and better there are many bugs the design should be responsive as well as it the vehicles images should be there and everything in short make it amazing and the login button is not visible there is only signup button so change that also it means need to change the whole design but not change the backend logic i want to just refine the front end so change the design completely and make it good and unique yet proffessional
+## Developer Prompt
 
-### Action & Staging
-* **AI Action:**
-  1. Added registration endpoint types and services inside `src/types/auth.ts` and `src/services/auth.service.ts`.
-  2. Replaced the plain login card with a unified **Sign In / Sign Up tabbed card** featuring full user details collection and role assignment matching backend schemas.
-  3. Implemented a beautiful customer showroom view using **Vehicle Cards** displaying images, pricing, and stock status badges with zoom animations on hover.
-  4. Added inline image thumbnails inside the vehicle column of the administrative table view.
-  5. Staged a fully responsive **Mobile Drawer Layout** with dynamic backdrop overlays and toggle hooks in the navbar.
+> Continue implementing the Vehicle Management module according to the approved implementation plan. Follow the existing architecture, reuse existing services, maintain TypeScript type safety, preserve backend APIs, and implement complete CRUD functionality.
+
+## Objectives
+
+- Vehicle listing
+- Vehicle details
+- Add vehicle
+- Edit vehicle
+- Delete vehicle
+- Search
+- Validation
+- API integration
+
+## AI Contribution
+
+- Generated reusable modal component
+- Implemented CRUD service methods
+- Improved VehicleForm
+- Added validation logic
+- Connected frontend with backend APIs
+- Improved table rendering
+- Generated reusable UI components
+- Assisted with TypeScript type safety
+
+---
+
+# Phase 3 — Git Workflow
+
+## Developer Prompt
+
+> Generate professional Conventional Commit messages documenting completed features while acknowledging AI-assisted development where appropriate.
+
+## Objectives
+
+- Maintain clean Git history
+- Follow Conventional Commits
+- Improve repository documentation
+
+## AI Contribution
+
+- Generated commit messages
+- Suggested logical commit boundaries
+- Recommended feature-based commit strategy
+
+---
+
+# Phase 4 — Purchase Management
+
+## Developer Prompt
+
+> Implement the Purchase Management module by integrating with the existing backend APIs. Follow the established folder structure, React Query architecture, and role-based authorization model while maintaining a buildable project after each feature.
+
+## Objectives
+
+- Purchase workflow
+- Purchase history
+- Customer purchases
+- Admin purchase management
+
+## AI Contribution
+
+- Generated purchase types
+- Built API service layer
+- Created purchase components
+- Connected purchase workflow
+- Implemented role-based rendering
+- Assisted with React Query integration
+
+---
+
+# Phase 5 — Reports Dashboard
+
+## Developer Prompt
+
+> Build the Reports module using the existing backend endpoints. Create reusable components, maintain responsive layouts, and keep the frontend synchronized with backend response structures.
+
+## Objectives
+
+- Sales Summary
+- Low Stock Report
+- Recent Purchases
+- Top Selling Vehicles
+
+## AI Contribution
+
+- Generated report models
+- Created report service layer
+- Built reusable report components
+- Assisted with parallel API requests
+- Connected dashboard reports
+
+---
+
+# Phase 6 — UI & UX Improvements
+
+## Developer Prompt
+
+> Improve the application's visual design without changing backend functionality. Focus on responsive layouts, accessibility, animations, loading states, typography, spacing, and overall user experience.
+
+## Objectives
+
+- Responsive layouts
+- Modern interface
+- Better typography
+- Better spacing
+- Loading states
+- Improved navigation
+
+## AI Contribution
+
+- Suggested layout improvements
+- Improved dashboard design
+- Enhanced authentication screens
+- Improved component consistency
+- Assisted with responsive behavior
+- Suggested reusable styling patterns
+
+---
+
+# Phase 7 — Frontend Redesign
+
+## Developer Prompt
+
+> Redesign the frontend to provide a modern, professional, and responsive user experience while preserving all backend APIs and business logic. Improve authentication, dashboard, navigation, vehicle presentation, and overall usability without modifying backend functionality.
+
+## Objectives
+
+- Modern UI
+- Better navigation
+- Improved authentication
+- Vehicle showcase
+- Responsive experience
+- Professional appearance
+
+## AI Contribution
+
+- Redesigned authentication flow
+- Improved dashboard layout
+- Enhanced vehicle presentation
+- Suggested reusable UI architecture
+- Assisted with responsive design
+- Improved frontend consistency
+
+---
+
+# Phase 8 — Documentation
+
+## Developer Prompt
+
+> Generate professional project documentation suitable for GitHub and academic submission while accurately describing implemented functionality and avoiding unsupported claims.
+
+## Objectives
+
+- README
+- API Documentation
+- Setup Guide
+- Project Report
+- AI Usage Documentation
+
+## AI Contribution
+
+- README generation
+- Documentation review
+- Technical writing
+- Architecture explanation
+- Setup instructions
+- Documentation refinement
+
+---
+
+# Development Principles
+
+Throughout the project, the following principles were consistently followed:
+
+- Existing backend APIs were preserved.
+- Business logic remained inside the backend.
+- Frontend consumed existing APIs without altering contracts.
+- TypeScript type safety was maintained.
+- Components were designed to be reusable.
+- React Query handled server-state management.
+- React Hook Form and Zod handled form validation.
+- Tailwind CSS was used for styling.
+- Feature-based folder organization was maintained.
+- Conventional Commits were used throughout development.
+
+---
+
+# AI Assistance Summary
+
+AI assistance primarily focused on:
+
+- Software architecture guidance
+- Planning implementation order
+- Debugging
+- Refactoring
+- Boilerplate generation
+- UI improvements
+- TypeScript assistance
+- Documentation
+- Git workflow guidance
+
+The developer remained responsible for:
+
+- Project design decisions
+- Backend implementation
+- Architecture validation
+- Testing
+- Debugging
+- Feature integration
+- Final code review
+- Repository management
+- Deployment
+- Documentation review
+
+---
+
+# Reflection
+
+Using AI as a development assistant significantly accelerated repetitive development tasks such as boilerplate generation, component scaffolding, documentation, and debugging suggestions. Rather than replacing the development process, AI acted as a collaborative tool that supported implementation while allowing the developer to focus on software architecture, business logic, testing, integration, and problem-solving.
+
+The final project reflects a combination of developer decision-making and AI-assisted productivity while maintaining code quality, project integrity, and truthful documentation.

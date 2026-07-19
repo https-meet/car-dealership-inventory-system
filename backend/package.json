@@ -7,8 +7,12 @@
     "dev": "nodemon --exec \"ts-node --transpile-only\" src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "seed": "ts-node prisma/seed.ts",
     "test": "jest --runInBand",
     "test:watch": "jest --watch"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   },
   "keywords": [],
   "author": "",
