@@ -30,9 +30,9 @@ class VehicleController {
   }
 
   async getById(
-    req: Request,
-    res: Response,
-    next: NextFunction,
+     req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction,
   ): Promise<void> {
     try {
       const vehicle = await vehicleService.getById(req.params.id);
@@ -46,7 +46,9 @@ class VehicleController {
     }
   }
 
-  async update(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async update(req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction,): Promise<void> {
     try {
       const vehicle = await vehicleService.update(req.params.id, req.body);
 
@@ -60,7 +62,9 @@ class VehicleController {
     }
   }
 
-  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async delete(req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction,): Promise<void> {
     try {
       await vehicleService.delete(req.params.id);
 

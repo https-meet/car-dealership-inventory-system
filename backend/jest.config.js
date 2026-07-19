@@ -10,10 +10,18 @@ module.exports = {
     ...tsJestTransformCfg,
   },
 
-  testMatch: ["**/tests/**/*.test.ts"],
+  roots: ["<rootDir>/tests"],
+
+  testMatch: ["**/*.test.ts"],
+
+  moduleFileExtensions: ["ts", "js", "json"],
 
   collectCoverageFrom: [
     "src/**/*.ts",
     "!src/server.ts",
   ],
+
+  clearMocks: true,
+
+  verbose: true,
 };

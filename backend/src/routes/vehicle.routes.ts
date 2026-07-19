@@ -5,8 +5,6 @@ import { vehicleController } from "../controllers/vehicle.controller";
 import { authenticate } from "../middleware/auth.middleware";
 import { authorize } from "../middleware/role.middleware";
 import { validate } from "../middleware/validation.middleware";
-import { createVehicleSchema } from "../validators/vehicle.validator";
-
 import {
     createVehicleSchema,
     updateVehicleSchema,

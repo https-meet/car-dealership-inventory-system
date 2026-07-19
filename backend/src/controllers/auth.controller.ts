@@ -11,10 +11,12 @@ export const register = async (
 };
 
 export const login = async (
-    req: Request,
-    res: Response
+  req: Request,
+  res: Response
 ): Promise<void> => {
-    const response = await authService.loginUser(req.body);
+  console.log("Login Body:", req.body);
 
-    res.status(response.statusCode).json(response.body);
+  const response = await authService.loginUser(req.body);
+
+  res.status(response.statusCode).json(response.body);
 };

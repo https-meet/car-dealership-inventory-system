@@ -1,4 +1,5 @@
 import app from "./app";
+// console.log("Imported app =", app);
 
 const PORT = process.env.PORT || 3000;
 

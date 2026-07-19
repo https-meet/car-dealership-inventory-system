@@ -10,6 +10,8 @@ export interface IVehicleRepository {
 
   update(id: string, data: UpdateVehicleDto): Promise<Vehicle>;
 
+  updateStock(id: string, quantity: number): Promise<Vehicle>;
+
   delete(id: string): Promise<Vehicle>;
 
   findDuplicate(

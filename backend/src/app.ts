@@ -7,15 +7,28 @@ import { Role } from "@prisma/client";
 import { errorHandler } from "./middleware/error.middleware";
 import { AppError } from "./utils/app-error";
 import vehicleRoutes from "./routes/vehicle.routes";
+import purchaseRoutes from "./routes/purchase.routes";
+import dashboardRoutes from "./routes/dashboard.routes";
+import reportRoutes from "./routes/report.routes";
+console.log("🔥 APP.TS IS RUNNING");
+// console.log("purchaseRoutes =", purchaseRoutes);
 
 
 const app = express();
+console.log("Registering purchase routes...");
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.originalUrl}`);
+  next();
+});
 app.use("/api/auth", authRoutes);
 app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/purchases", purchaseRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/reports", reportRoutes);
 
 
 // Health Check Route
