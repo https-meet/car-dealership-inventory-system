@@ -7,86 +7,131 @@ interface Props {
 }
 
 const rankColors = [
-  "bg-amber-400 text-white",   // 1st — gold
-  "bg-slate-400 text-white",   // 2nd — silver
-  "bg-orange-400 text-white",  // 3rd — bronze
+  "bg-amber-500 text-white",
+  "bg-slate-500 text-white",
+  "bg-orange-500 text-white",
 ];
 
 export default function TopSellingTable({ entries }: Props) {
   if (entries.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white py-10 text-slate-400">
-        <Trophy size={28} className="mb-2 opacity-30" />
-        <p className="text-sm">No sales data available yet.</p>
+      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 bg-white py-10 text-center">
+        <Trophy size={30} className="mb-2 text-slate-300" />
+        <p className="text-sm font-semibold text-slate-700">
+          No sales data available yet.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl bg-white shadow">
-      <table className="min-w-full text-sm">
-        <thead>
-          <tr className="border-b border-slate-100 bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-            <th className="px-5 py-3">Rank</th>
-            <th className="px-5 py-3">Vehicle</th>
-            <th className="px-5 py-3">Category</th>
-            <th className="px-5 py-3">Unit Price</th>
-            <th className="px-5 py-3">Units Sold</th>
-            <th className="px-5 py-3">Total Revenue</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-50">
-          {entries.map((entry, idx) => {
-            const v = entry.vehicle;
-            const revenue = v ? Number(v.price) * entry.totalSold : 0;
-            const rankClass =
-              rankColors[idx] ?? "bg-slate-100 text-slate-600";
+    <div className="space-y-3">
+      <div className="grid gap-3 md:hidden">
+        {entries.map((entry, idx) => {
+          const v = entry.vehicle;
+          const revenue = v ? Number(v.price) * entry.totalSold : 0;
+          const rankClass = rankColors[idx] ?? "bg-slate-100 text-slate-700";
 
-            return (
-              <tr
-                key={v?.id ?? idx}
-                className="hover:bg-slate-50 transition-colors"
-              >
-                <td className="px-5 py-4">
-                  <span
-                    className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${rankClass}`}
-                  >
-                    {idx + 1}
-                  </span>
-                </td>
-                <td className="px-5 py-4">
-                  {v ? (
-                    <div>
-                      <p className="font-medium text-slate-800">
-                        {v.make} {v.model}
-                      </p>
-                    </div>
-                  ) : (
-                    <span className="text-xs italic text-slate-400">
-                      Unknown
-                    </span>
-                  )}
-                </td>
-                <td className="px-5 py-4 text-slate-600">
-                  {v ? titleCase(v.category) : "—"}
-                </td>
-                <td className="px-5 py-4 text-slate-700">
-                  {v ? formatCurrency(v.price) : "—"}
-                </td>
-                <td className="px-5 py-4">
-                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                    {entry.totalSold} units
-                  </span>
-                </td>
-                <td className="px-5 py-4 font-semibold text-emerald-700">
-                  {revenue > 0 ? formatCurrency(revenue) : "—"}
-                </td>
+          return (
+            <article
+              key={v?.id ?? idx}
+              className="rounded-lg border border-slate-200 bg-white p-4"
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${rankClass}`}
+                >
+                  {idx + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-bold text-slate-950">
+                    {v ? `${v.make} ${v.model}` : "Unknown vehicle"}
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-slate-500">
+                    {v ? titleCase(v.category) : "--"}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3 rounded-lg bg-slate-50 p-3">
+                <div>
+                  <p className="text-xs font-semibold text-slate-500">Units sold</p>
+                  <p className="mt-1 text-sm font-bold text-slate-950">
+                    {entry.totalSold}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-slate-500">Revenue</p>
+                  <p className="mt-1 text-sm font-bold text-slate-950">
+                    {revenue > 0 ? formatCurrency(revenue) : "--"}
+                  </p>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+
+      <div className="hidden overflow-hidden rounded-lg border border-slate-200 md:block">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-left text-sm">
+            <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+              <tr>
+                <th className="px-5 py-3">Rank</th>
+                <th className="px-5 py-3">Vehicle</th>
+                <th className="px-5 py-3">Category</th>
+                <th className="px-5 py-3">Unit Price</th>
+                <th className="px-5 py-3">Units Sold</th>
+                <th className="px-5 py-3">Total Revenue</th>
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {entries.map((entry, idx) => {
+                const v = entry.vehicle;
+                const revenue = v ? Number(v.price) * entry.totalSold : 0;
+                const rankClass =
+                  rankColors[idx] ?? "bg-slate-100 text-slate-700";
+
+                return (
+                  <tr key={v?.id ?? idx} className="transition hover:bg-slate-50/70">
+                    <td className="px-5 py-4">
+                      <span
+                        className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${rankClass}`}
+                      >
+                        {idx + 1}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      {v ? (
+                        <p className="font-bold text-slate-950">
+                          {v.make} {v.model}
+                        </p>
+                      ) : (
+                        <span className="text-xs italic text-slate-400">
+                          Unknown
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-5 py-4 font-medium text-slate-600">
+                      {v ? titleCase(v.category) : "--"}
+                    </td>
+                    <td className="px-5 py-4 font-medium text-slate-600">
+                      {v ? formatCurrency(v.price) : "--"}
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="inline-flex rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700 ring-1 ring-sky-100">
+                        {entry.totalSold} units
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 font-bold text-slate-950">
+                      {revenue > 0 ? formatCurrency(revenue) : "--"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
-

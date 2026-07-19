@@ -1,147 +1,305 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, LogIn, Car } from "lucide-react";
-import { login } from "../../services/auth.service";
+import { Lock, Mail, ShieldCheck, UserRound } from "lucide-react";
+import { login, register as registerUser } from "../../services/auth.service";
 
-const schema = z.object({
-  email: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+const loginSchema = z.object({
+  email: z.string().email("Enter a valid email address"),
+  password: z.string().min(1, "Password is required"),
 });
 
-type FormData = z.infer<typeof schema>;
+const registerSchema = z.object({
+  firstName: z.string().min(2, "Use at least 2 characters"),
+  lastName: z.string().min(2, "Use at least 2 characters"),
+  email: z.string().email("Enter a valid email address"),
+  password: z.string().min(6, "Use at least 6 characters"),
+  role: z.enum(["ADMIN", "CUSTOMER"]),
+});
+
+type LoginData = z.infer<typeof loginSchema>;
+type RegisterData = z.infer<typeof registerSchema>;
+type RegisterRole = RegisterData["role"];
+
+function apiErrorMessage(error: unknown, fallback: string) {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "response" in error
+  ) {
+    const response = (error as { response?: { data?: { message?: string } } })
+      .response;
+    return response?.data?.message ?? fallback;
+  }
+
+  return fallback;
+}
 
 export default function LoginForm() {
+  const [isLoginMode, setIsLoginMode] = useState(true);
+  const [selectedRole, setSelectedRole] = useState<RegisterRole>("CUSTOMER");
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  const loginForm = useForm<LoginData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+  });
 
-  const onSubmit = async (data: FormData) => {
-    try {
-      const response = await login(data);
-      localStorage.setItem("token", response.token);
-      localStorage.setItem("user", JSON.stringify(response.user));
-      toast.success(`Welcome back, ${response.user.firstName}!`);
+  const registerForm = useForm<RegisterData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      role: "CUSTOMER",
+    },
+  });
+
+  const loginMutation = useMutation({
+    mutationFn: login,
+    onSuccess: (res) => {
+      localStorage.setItem("token", res.token);
+      localStorage.setItem("user", JSON.stringify(res.user));
       navigate("/dashboard");
-    } catch {
-      toast.error("Invalid email or password");
-    }
+    },
+    onError: (error: unknown) => {
+      toast.error(apiErrorMessage(error, "Invalid credentials"));
+    },
+  });
+
+  const registerMutation = useMutation({
+    mutationFn: registerUser,
+    onSuccess: () => {
+      toast.success("Account created. Please sign in.");
+      setIsLoginMode(true);
+      setSelectedRole("CUSTOMER");
+      registerForm.reset();
+    },
+    onError: (error: unknown) => {
+      toast.error(apiErrorMessage(error, "Registration failed"));
+    },
+  });
+
+  const handleModeSwitch = (mode: boolean) => {
+    setIsLoginMode(mode);
+    loginForm.clearErrors();
+    registerForm.clearErrors();
   };
 
-  const inputBase =
-    "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 transition-all";
+  const roleField = registerForm.register("role");
 
   return (
-    <div className="w-full max-w-md animate-fade-up">
-      {/* Card */}
-      <div className="rounded-2xl bg-white px-8 py-10 shadow-xl ring-1 ring-slate-100">
-        {/* Brand */}
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200">
-            <Car size={28} />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-800">Welcome back</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Sign in to your Car Dealership account
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" noValidate>
-          {/* Email */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Email address
-            </label>
-            <input
-              {...register("email")}
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="email"
-              className={inputBase}
-            />
-            {errors.email && (
-              <p className="mt-1.5 text-xs text-red-500">{errors.email.message}</p>
-            )}
-          </div>
-
-          {/* Password */}
-          <div>
-            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                {...register("password")}
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                autoComplete="current-password"
-                className={`${inputBase} pr-11`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
-            {errors.password && (
-              <p className="mt-1.5 text-xs text-red-500">{errors.password.message}</p>
-            )}
-          </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-semibold text-white shadow-md shadow-blue-200 hover:bg-blue-700 disabled:opacity-60 transition-all mt-2"
-          >
-            {isSubmitting ? (
-              <>
-                <svg
-                  className="h-4 w-4 animate-spin"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8H4z"
-                  />
-                </svg>
-                Signing in…
-              </>
-            ) : (
-              <>
-                <LogIn size={16} />
-                Sign In
-              </>
-            )}
-          </button>
-        </form>
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 rounded-lg bg-slate-100 p-1">
+        <button
+          type="button"
+          onClick={() => handleModeSwitch(true)}
+          className={`rounded-md px-3 py-2 text-sm font-semibold transition ${
+            isLoginMode
+              ? "bg-white text-slate-950 shadow-sm"
+              : "text-slate-500 hover:text-slate-900"
+          }`}
+        >
+          Sign in
+        </button>
+        <button
+          type="button"
+          onClick={() => handleModeSwitch(false)}
+          className={`rounded-md px-3 py-2 text-sm font-semibold transition ${
+            !isLoginMode
+              ? "bg-white text-slate-950 shadow-sm"
+              : "text-slate-500 hover:text-slate-900"
+          }`}
+        >
+          Register
+        </button>
       </div>
 
-      {/* Footer */}
-      <p className="mt-6 text-center text-xs text-slate-400">
-        Car Dealership Inventory System &copy; {new Date().getFullYear()}
-      </p>
+      {isLoginMode ? (
+        <form
+          onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))}
+          className="space-y-4"
+          noValidate
+        >
+          <div>
+            <label className="label">Email address</label>
+            <div className="relative">
+              <Mail
+                size={16}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                type="email"
+                placeholder="admin@dealership.com"
+                {...loginForm.register("email")}
+                className="field pl-10"
+              />
+            </div>
+            {loginForm.formState.errors.email && (
+              <p className="mt-1.5 text-xs font-medium text-rose-600">
+                {loginForm.formState.errors.email.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="label">Password</label>
+            <div className="relative">
+              <Lock
+                size={16}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                type="password"
+                placeholder="Enter your password"
+                {...loginForm.register("password")}
+                className="field pl-10"
+              />
+            </div>
+            {loginForm.formState.errors.password && (
+              <p className="mt-1.5 text-xs font-medium text-rose-600">
+                {loginForm.formState.errors.password.message}
+              </p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={loginMutation.isPending}
+            className="btn-primary w-full"
+          >
+            {loginMutation.isPending ? "Signing in..." : "Sign in"}
+          </button>
+        </form>
+      ) : (
+        <form
+          onSubmit={registerForm.handleSubmit((data) =>
+            registerMutation.mutate(data)
+          )}
+          className="space-y-4"
+          noValidate
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label className="label">First name</label>
+              <input
+                type="text"
+                placeholder="Aarav"
+                {...registerForm.register("firstName")}
+                className="field"
+              />
+              {registerForm.formState.errors.firstName && (
+                <p className="mt-1.5 text-xs font-medium text-rose-600">
+                  {registerForm.formState.errors.firstName.message}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="label">Last name</label>
+              <input
+                type="text"
+                placeholder="Shah"
+                {...registerForm.register("lastName")}
+                className="field"
+              />
+              {registerForm.formState.errors.lastName && (
+                <p className="mt-1.5 text-xs font-medium text-rose-600">
+                  {registerForm.formState.errors.lastName.message}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label className="label">Email address</label>
+            <div className="relative">
+              <Mail
+                size={16}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                type="email"
+                placeholder="you@example.com"
+                {...registerForm.register("email")}
+                className="field pl-10"
+              />
+            </div>
+            {registerForm.formState.errors.email && (
+              <p className="mt-1.5 text-xs font-medium text-rose-600">
+                {registerForm.formState.errors.email.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="label">Password</label>
+            <div className="relative">
+              <Lock
+                size={16}
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              />
+              <input
+                type="password"
+                placeholder="Create a password"
+                {...registerForm.register("password")}
+                className="field pl-10"
+              />
+            </div>
+            {registerForm.formState.errors.password && (
+              <p className="mt-1.5 text-xs font-medium text-rose-600">
+                {registerForm.formState.errors.password.message}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="label">Account role</label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { value: "CUSTOMER", label: "Customer", icon: UserRound },
+                { value: "ADMIN", label: "Admin", icon: ShieldCheck },
+              ].map(({ value, label, icon: Icon }) => (
+                <label
+                  key={value}
+                  className={`flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-semibold transition ${
+                    selectedRole === value
+                      ? "border-teal-300 bg-teal-50 text-teal-900"
+                      : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    value={value}
+                    className="sr-only"
+                    name={roleField.name}
+                    ref={roleField.ref}
+                    onBlur={roleField.onBlur}
+                    onChange={(event) => {
+                      roleField.onChange(event);
+                      setSelectedRole(event.target.value as RegisterRole);
+                    }}
+                  />
+                  <Icon size={16} />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={registerMutation.isPending}
+            className="btn-primary w-full"
+          >
+            {registerMutation.isPending ? "Creating account..." : "Create account"}
+          </button>
+        </form>
+      )}
     </div>
   );
-}
+}

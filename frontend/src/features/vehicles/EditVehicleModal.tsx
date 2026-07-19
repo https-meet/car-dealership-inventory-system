@@ -12,7 +12,7 @@ export default function EditVehicleModal({ vehicle, onClose }: EditVehicleModalP
     <Modal
       isOpen={vehicle !== null}
       onClose={onClose}
-      title="Edit Vehicle"
+      title="Edit vehicle"
     >
       {vehicle && (
         <VehicleForm

@@ -1,58 +1,52 @@
 import type { LucideIcon } from "lucide-react";
 import { formatNumber } from "../../utils/format";
 
-type ColorTheme = "blue" | "violet" | "emerald" | "amber" | "rose";
-
 interface DashboardCardProps {
   title: string;
   value: number;
   icon: LucideIcon;
-  color?: ColorTheme;
+  tone?: "teal" | "amber" | "sky" | "rose" | "slate";
   suffix?: string;
 }
 
-const themeMap: Record<ColorTheme, { icon: string; bar: string; text: string }> = {
-  blue:    { icon: "bg-blue-50 text-blue-600",    bar: "bg-blue-600",    text: "text-blue-600" },
-  violet:  { icon: "bg-violet-50 text-violet-600", bar: "bg-violet-600",  text: "text-violet-600" },
-  emerald: { icon: "bg-emerald-50 text-emerald-600", bar: "bg-emerald-500", text: "text-emerald-600" },
-  amber:   { icon: "bg-amber-50 text-amber-600",   bar: "bg-amber-500",   text: "text-amber-600" },
-  rose:    { icon: "bg-rose-50 text-rose-600",     bar: "bg-rose-600",    text: "text-rose-600" },
+const tones = {
+  teal: "bg-teal-50 text-teal-700 ring-teal-100",
+  amber: "bg-amber-50 text-amber-700 ring-amber-100",
+  sky: "bg-sky-50 text-sky-700 ring-sky-100",
+  rose: "bg-rose-50 text-rose-700 ring-rose-100",
+  slate: "bg-slate-100 text-slate-700 ring-slate-200",
 };
 
 export default function DashboardCard({
   title,
   value,
   icon: Icon,
-  color = "blue",
+  tone = "slate",
   suffix,
 }: DashboardCardProps) {
-  const theme = themeMap[color];
-
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 transition-shadow hover:shadow-md">
-      {/* Accent bar */}
-      <div className={`absolute inset-x-0 top-0 h-1 ${theme.bar}`} />
-
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-            {title}
-          </p>
-          <p className="mt-3 text-3xl font-extrabold text-slate-800">
-            {formatNumber(value)}
+    <div className="surface p-5 transition hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-semibold text-slate-500">{title}</p>
+          <div className="mt-3 flex items-baseline gap-1.5">
+            <h3 className="text-3xl font-bold tracking-tight text-slate-950">
+              {formatNumber(value)}
+            </h3>
             {suffix && (
-              <span className="ml-1 text-base font-medium text-slate-400">
+              <span className="text-sm font-semibold text-slate-400">
                 {suffix}
               </span>
             )}
-          </p>
+          </div>
         </div>
 
-        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${theme.icon}`}>
-          <Icon size={22} />
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ring-1 ${tones[tone]}`}
+        >
+          <Icon size={19} strokeWidth={2.2} />
         </div>
       </div>
     </div>
   );
 }
-

@@ -1,11 +1,5 @@
+import type { ReactNode } from "react";
 import { useQueries } from "@tanstack/react-query";
-import {
-  BarChart3,
-  AlertTriangle,
-  Clock,
-  Trophy,
-  TrendingUp,
-} from "lucide-react";
 import SalesSummaryCard from "../features/reports/SalesSummaryCard";
 import LowStockTable from "../features/reports/LowStockTable";
 import RecentPurchasesTable from "../features/reports/RecentPurchasesTable";
@@ -17,91 +11,72 @@ import {
   getSalesSummary,
 } from "../services/report.service";
 
-// ─── Section wrapper ──────────────────────────────────────────────────────────
 interface ReportSectionProps {
   title: string;
-  icon: React.ReactNode;
   count?: number;
   isLoading: boolean;
   isError: boolean;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 function ReportSection({
   title,
-  icon,
   count,
   isLoading,
   isError,
   children,
 }: ReportSectionProps) {
   return (
-    <section className="space-y-3">
-      <div className="flex items-center gap-2">
-        <span className="text-slate-500">{icon}</span>
-        <h2 className="text-base font-semibold text-slate-700">{title}</h2>
+    <section className="surface overflow-hidden">
+      <div className="flex items-center justify-between gap-4 border-b border-slate-200 bg-slate-50 px-5 py-4">
+        <h3 className="text-sm font-bold text-slate-950">{title}</h3>
         {count !== undefined && !isLoading && !isError && (
-          <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-500">
-            {count}
+          <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-500">
+            {count} items
           </span>
         )}
       </div>
-
-      {isLoading ? (
-        <div className="h-32 animate-pulse rounded-xl bg-slate-100" />
-      ) : isError ? (
-        <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
-          Failed to load this report. Please try again.
-        </div>
-      ) : (
-        children
-      )}
+      <div className="p-5">
+        {isLoading ? (
+          <div className="shimmer-effect h-36 w-full rounded-lg border border-slate-200 bg-slate-50" />
+        ) : isError ? (
+          <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700">
+            Failed to load data.
+          </div>
+        ) : (
+          children
+        )}
+      </div>
     </section>
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
 export default function ReportsPage() {
   const [lowStock, recentPurchases, topSelling, salesSummary] = useQueries({
     queries: [
-      {
-        queryKey: ["reports", "low-stock"],
-        queryFn: () => getLowStock(5),
-      },
-      {
-        queryKey: ["reports", "recent-purchases"],
-        queryFn: () => getRecentPurchases(10),
-      },
-      {
-        queryKey: ["reports", "top-selling"],
-        queryFn: () => getTopSelling(10),
-      },
-      {
-        queryKey: ["reports", "sales-summary"],
-        queryFn: getSalesSummary,
-      },
+      { queryKey: ["reports", "low-stock"], queryFn: () => getLowStock(5) },
+      { queryKey: ["reports", "recent-purchases"], queryFn: () => getRecentPurchases(10) },
+      { queryKey: ["reports", "top-selling"], queryFn: () => getTopSelling(10) },
+      { queryKey: ["reports", "sales-summary"], queryFn: getSalesSummary },
     ],
   });
 
   return (
-    <div className="space-y-8">
-      {/* Page header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-600 text-white">
-          <BarChart3 size={20} />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Reports</h1>
-          <p className="text-sm text-slate-500">
-            Analytics and inventory insights — Admin view
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6">
+      <section className="surface p-5 sm:p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-700">
+          Admin analytics
+        </p>
+        <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
+          Reports
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+          Monitor revenue, low stock vehicles, recent purchases, and top sellers.
+        </p>
+      </section>
 
-      {/* Sales Summary */}
       <ReportSection
-        title="Sales Summary"
-        icon={<TrendingUp size={18} />}
+        title="Revenue overview"
         isLoading={salesSummary.isLoading}
         isError={salesSummary.isError}
       >
@@ -110,42 +85,34 @@ export default function ReportsPage() {
         )}
       </ReportSection>
 
-      {/* Low Stock */}
-      <ReportSection
-        title="Low Stock Vehicles"
-        icon={<AlertTriangle size={18} />}
-        count={lowStock.data?.data.length}
-        isLoading={lowStock.isLoading}
-        isError={lowStock.isError}
-      >
-        {lowStock.data && (
-          <LowStockTable vehicles={lowStock.data.data} />
-        )}
-      </ReportSection>
+      <div className="grid gap-6 xl:grid-cols-2">
+        <ReportSection
+          title="Low stock alerts"
+          count={lowStock.data?.data.length}
+          isLoading={lowStock.isLoading}
+          isError={lowStock.isError}
+        >
+          {lowStock.data && <LowStockTable vehicles={lowStock.data.data} />}
+        </ReportSection>
 
-      {/* Recent Purchases */}
+        <ReportSection
+          title="Top sellers"
+          count={topSelling.data?.data.length}
+          isLoading={topSelling.isLoading}
+          isError={topSelling.isError}
+        >
+          {topSelling.data && <TopSellingTable entries={topSelling.data.data} />}
+        </ReportSection>
+      </div>
+
       <ReportSection
-        title="Recent Purchases"
-        icon={<Clock size={18} />}
+        title="Recent transactions"
         count={recentPurchases.data?.data.length}
         isLoading={recentPurchases.isLoading}
         isError={recentPurchases.isError}
       >
         {recentPurchases.data && (
           <RecentPurchasesTable purchases={recentPurchases.data.data} />
-        )}
-      </ReportSection>
-
-      {/* Top Selling */}
-      <ReportSection
-        title="Top Selling Vehicles"
-        icon={<Trophy size={18} />}
-        count={topSelling.data?.data.length}
-        isLoading={topSelling.isLoading}
-        isError={topSelling.isError}
-      >
-        {topSelling.data && (
-          <TopSellingTable entries={topSelling.data.data} />
         )}
       </ReportSection>
     </div>

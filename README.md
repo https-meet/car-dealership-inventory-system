@@ -1,4 +1,4 @@
-# Car Dealership Inventory System
+# DealerDrive — Car Dealership Inventory System
 
 A full-stack, enterprise-grade Car Dealership Inventory System designed with role-based access control, real-time inventory tracking, transactional purchases, and interactive management dashboards.
 
@@ -121,13 +121,15 @@ docker-compose up -d
 ## 🚥 Application Features & Role Behavior
 
 ### 🔑 User Authentication
-* **Registration & Login:** Simple and validated registration flow. Persists session tokens and typed user details.
+* **Unified Auth Card:** Features clean Tab toggle controls between **Sign In** and **Sign Up** (Registration).
+* **Role Options:** During registration, users can select whether they want a Customer account or Admin account.
 * **Role Badging:** Interactive, color-coded badges in the navbar indicating the current user's role.
 
-### 🚗 Vehicle Inventory (`/vehicles`)
-* **Shared Access:** Both Admins and Customers can search, filter, and view the entire fleet of vehicles.
-* **Admin Privilege:** Admins see action buttons to **Edit** (with pre-filled fields) or **Delete** vehicles. They also have an **Add Vehicle** button to open the vehicle creation form.
-* **Customer Privilege:** Customers see a **Buy** button. If stock is 0, the button turns into a disabled **Sold Out** state.
+### 🚗 Responsive Vehicle Showroom (`/vehicles`)
+* **Dual View Modes:**
+  * **Customer Showroom Grid:** Displays vehicles as gorgeous high-fidelity cards featuring prominent vehicle images, hover zoom transitions, category badges, stock badges, and pricing. Customers can toggle between Grid and List views.
+  * **Admin Inventory Table:** Displays a dense layout containing inline image thumbnails, make/model/year, stock numbers, and quick Edit / Delete buttons.
+* **Privileges:** Admins have exclusive access to the **Add Vehicle** form, and Edit/Delete controls. Customers have access to the purchase checkout modal.
 
 ### 🛒 Purchase Flow (`/purchases`)
 * **Customer Buy Form:** Opens a purchase modal displaying a summary card, stock availability, and quantity input. The estimated total price updates in real-time as the user types.
@@ -203,7 +205,7 @@ PASS tests/app.test.ts
       √ should return API health status (8 ms)
 
 PASS tests/authorization.test.ts
-  Authorization Middleware
+  Authentication Middleware
     √ should deny access without token (9 ms)
 
 Test Suites: 5 passed, 5 total
@@ -226,6 +228,9 @@ Ran all test suites.
 3. **Complex Form Validation:** Assisted in setting up the Zod schemas for forms, transforming input fields to numbers (using `z.coerce`), and verifying that conditional image fields (`imageUrl`) are stripped if empty, matching the database schema constraints.
 4. **Dashboard Layout & UI Polish:** Code suggestions for Tailwind-based responsive designs, custom slim scrollbars, transitions, page-entry fade effects, and clean, beautiful loading skeletons for the dashboard.
 5. **DRY Refactoring:** Helped build the central `format.ts` utility file and sweep the codebase to replace local formatting helpers, making code more readable.
+6. **Mobile Layout Drawer:** Restructured the side navigation to hide off-screen on mobile viewports, enabling sliding animations toggleable via a responsive navbar hamburger icon.
+7. **Unified Auth Page Toggle:** Redesigned the auth module to let users switch between sign-in and registration states on a single card.
+8. **Showroom Cards Grid:** Implemented customer-facing cards for the showroom inventory containing vehicle image views, hover zoom levels, and stock highlights.
 
 ### Reflections & Workflow Impact
 * **Velocity:** Using an AI assistant allowed me to write boilerplate code rapidly (such as CRUD endpoints and tables) while allowing me to focus on role authorization routing and custom business logic.

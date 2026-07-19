@@ -1,26 +1,29 @@
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, type FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { ShoppingCart } from "lucide-react";
+import { CarFront, ShoppingCart } from "lucide-react";
 import Modal from "../../components/ui/Modal";
 import { createPurchase } from "../../services/purchase.service";
 import type { Vehicle } from "../../types/vehicle";
-import { formatCurrency, titleCase } from "../../utils/format";
-
-const schema = z.object({
-  quantity: z.coerce
-    .number({ error: "Quantity is required" })
-    .int("Must be a whole number")
-    .min(1, "At least 1 unit required"),
-});
-
-type FormData = z.infer<typeof schema>;
+import { formatCurrency } from "../../utils/format";
 
 interface PurchaseVehicleModalProps {
   vehicle: Vehicle | null;
   onClose: () => void;
+}
+
+function apiErrorMessage(error: unknown, fallback: string) {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "response" in error
+  ) {
+    const response = (error as { response?: { data?: { message?: string } } })
+      .response;
+    return response?.data?.message ?? fallback;
+  }
+
+  return fallback;
 }
 
 export default function PurchaseVehicleModal({
@@ -28,149 +31,125 @@ export default function PurchaseVehicleModal({
   onClose,
 }: PurchaseVehicleModalProps) {
   const queryClient = useQueryClient();
+  const [quantityValue, setQuantityValue] = useState("1");
+  const [quantityError, setQuantityError] = useState("");
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    formState: { errors },
-  } = useForm<FormData>({
-    resolver: zodResolver(schema),
-    defaultValues: { quantity: 1 },
-  });
-
-  const quantity = watch("quantity") || 1;
+  const quantity = Number(quantityValue || 0);
   const unitPrice = vehicle ? Number(vehicle.price) : 0;
-  const estimatedTotal = unitPrice * (isNaN(quantity) ? 0 : quantity);
+  const estimatedTotal = unitPrice * (Number.isNaN(quantity) ? 0 : quantity);
 
   const mutation = useMutation({
-    mutationFn: (data: FormData) =>
-      createPurchase({ vehicleId: vehicle!.id, quantity: data.quantity }),
+    mutationFn: (quantityToBuy: number) =>
+      createPurchase({ vehicleId: vehicle!.id, quantity: quantityToBuy }),
     onSuccess: () => {
-      toast.success("Purchase successful! 🎉");
-      // Invalidate both purchases and vehicles (stock decreases)
+      toast.success("Purchase successful");
       queryClient.invalidateQueries({ queryKey: ["purchases"] });
       queryClient.invalidateQueries({ queryKey: ["vehicles"] });
-      reset();
+      setQuantityValue("1");
+      setQuantityError("");
       onClose();
     },
-    onError: (error: { response?: { data?: { message?: string } } }) => {
-      const msg =
-        error?.response?.data?.message ?? "Purchase failed. Please try again.";
-      toast.error(msg);
+    onError: (error: unknown) => {
+      toast.error(apiErrorMessage(error, "Purchase failed."));
     },
   });
 
   const handleClose = () => {
-    reset();
+    setQuantityValue("1");
+    setQuantityError("");
     onClose();
   };
 
-  const inputClass =
-    "w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 transition-colors";
+  const submitPurchase = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!vehicle) return;
+
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      setQuantityError("Use a whole number of at least 1");
+      return;
+    }
+
+    if (quantity > vehicle.quantity) {
+      setQuantityError(`Only ${vehicle.quantity} available`);
+      return;
+    }
+
+    setQuantityError("");
+    mutation.mutate(quantity);
+  };
 
   return (
-    <Modal isOpen={vehicle !== null} onClose={handleClose} title="Purchase Vehicle">
+    <Modal isOpen={vehicle !== null} onClose={handleClose} title="Complete purchase">
       {vehicle && (
         <div className="space-y-5">
-          {/* Vehicle summary card */}
-          <div className="flex gap-4 rounded-xl border border-slate-100 bg-slate-50 p-4">
-            {vehicle.imageUrl ? (
-              <img
-                src={vehicle.imageUrl}
-                alt={`${vehicle.make} ${vehicle.model}`}
-                className="h-20 w-28 rounded-lg object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
-            ) : (
-              <div className="flex h-20 w-28 items-center justify-center rounded-lg bg-slate-200 text-slate-400">
-                <ShoppingCart size={24} />
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <div className="flex gap-3">
+              {vehicle.imageUrl ? (
+                <img
+                  src={vehicle.imageUrl}
+                  alt={`${vehicle.make} ${vehicle.model}`}
+                  className="h-20 w-28 shrink-0 rounded-lg border border-slate-200 object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+              ) : (
+                <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-300">
+                  <CarFront size={30} />
+                </div>
+              )}
+              <div className="min-w-0">
+                <h4 className="truncate text-base font-bold text-slate-950">
+                  {vehicle.make} {vehicle.model}
+                </h4>
+                <p className="mt-1 text-sm font-semibold text-slate-600">
+                  {formatCurrency(unitPrice)} per unit
+                </p>
+                <p className="mt-2 text-xs font-semibold text-teal-800">
+                  {vehicle.quantity} available
+                </p>
               </div>
-            )}
-            <div className="flex-1">
-              <p className="font-semibold text-slate-800">
-                {vehicle.make} {vehicle.model}
-              </p>
-              <p className="mt-0.5 text-xs text-slate-500">
-                {vehicle.year} · {titleCase(vehicle.category)}
-              </p>
-              <p className="mt-2 text-lg font-bold text-blue-600">
-                {formatCurrency(unitPrice)}
-                <span className="ml-1 text-xs font-normal text-slate-400">
-                  per unit
-                </span>
-              </p>
-              <p className="text-xs text-slate-500">
-                {vehicle.quantity > 0 ? (
-                  <span className="text-emerald-600">
-                    {vehicle.quantity} in stock
-                  </span>
-                ) : (
-                  <span className="text-red-500">Out of stock</span>
-                )}
-              </p>
             </div>
           </div>
 
-          {/* Purchase form */}
-          <form
-            onSubmit={handleSubmit((data) => mutation.mutate(data))}
-            className="space-y-4"
-            noValidate
-          >
+          <form onSubmit={submitPurchase} className="space-y-4" noValidate>
             <div>
-              <label className="mb-1 block text-xs font-medium text-slate-600">
-                Quantity <span className="text-red-400">*</span>
-              </label>
+              <label className="label">Quantity</label>
               <input
                 type="number"
                 min={1}
                 max={vehicle.quantity}
-                {...register("quantity")}
-                className={inputClass}
+                value={quantityValue}
+                onChange={(event) => setQuantityValue(event.target.value)}
+                className="field"
               />
-              {errors.quantity && (
-                <p className="mt-1 text-xs text-red-500">
-                  {errors.quantity.message}
-                </p>
-              )}
-              {vehicle.quantity > 0 && (
-                <p className="mt-1 text-xs text-slate-400">
-                  Max available: {vehicle.quantity}
+              {quantityError && (
+                <p className="mt-1.5 text-xs font-medium text-rose-600">
+                  {quantityError}
                 </p>
               )}
             </div>
 
-            {/* Estimated total */}
-            {estimatedTotal > 0 && (
-              <div className="flex items-center justify-between rounded-lg bg-blue-50 px-4 py-3">
-                <span className="text-sm font-medium text-slate-600">
-                  Estimated Total
-                </span>
-                <span className="text-lg font-bold text-blue-700">
+            <div className="rounded-lg border border-slate-200 bg-white p-4">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-semibold text-slate-600">Estimated total</span>
+                <span className="text-xl font-bold text-slate-950">
                   {formatCurrency(estimatedTotal)}
                 </span>
               </div>
-            )}
+            </div>
 
-            <div className="flex items-center justify-end gap-3 pt-1">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-              >
+            <div className="flex flex-col-reverse gap-3 pt-1 sm:flex-row sm:justify-end">
+              <button type="button" onClick={handleClose} className="btn-secondary">
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={mutation.isPending || vehicle.quantity === 0}
-                className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                className="btn-primary"
               >
-                <ShoppingCart size={15} />
-                {mutation.isPending ? "Processing…" : "Confirm Purchase"}
+                <ShoppingCart size={16} />
+                {mutation.isPending ? "Processing..." : "Confirm purchase"}
               </button>
             </div>
           </form>

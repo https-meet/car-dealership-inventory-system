@@ -8,7 +8,27 @@ export interface LoginResponse {
   message: string;
   token: string;
   user: {
-    id: number;
+    id: string; // The database UUID is String
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: "ADMIN" | "CUSTOMER";
+  };
+}
+
+export interface RegisterRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  role?: "ADMIN" | "CUSTOMER";
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
+  user: {
+    id: string;
     firstName: string;
     lastName: string;
     email: string;

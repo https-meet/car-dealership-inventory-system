@@ -1,13 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { ShoppingBag, Receipt, TrendingUp } from "lucide-react";
+import { ReceiptText, ShoppingBag, WalletCards } from "lucide-react";
 import PurchaseTable from "../features/purchases/PurchaseTable";
 import { getPurchases } from "../services/purchase.service";
 import { getVehicles } from "../services/vehicle.service";
-import { useAuth, useIsAdmin } from "../hooks/useAuth";
-import { formatCurrency } from "../utils/format";
+import { useIsAdmin } from "../hooks/useAuth";
+import { formatCurrency, formatNumber } from "../utils/format";
 
 export default function PurchasesPage() {
-  const user = useAuth();
   const isAdmin = useIsAdmin();
 
   const {
@@ -19,8 +18,6 @@ export default function PurchasesPage() {
     queryFn: getPurchases,
   });
 
-  // Vehicles are already likely cached from VehiclesPage.
-  // We fetch them here to build the vehicle name lookup map.
   const { data: vehiclesData } = useQuery({
     queryKey: ["vehicles"],
     queryFn: getVehicles,
@@ -29,7 +26,6 @@ export default function PurchasesPage() {
   const purchases = purchasesData?.data ?? [];
   const vehicles = vehiclesData?.data ?? [];
 
-  // Compute summary stats
   const totalUnits = purchases.reduce((sum, p) => sum + p.quantity, 0);
   const vehicleMap = new Map(vehicles.map((v) => [v.id, v]));
   const totalSpend = purchases.reduce((sum, p) => {
@@ -37,80 +33,53 @@ export default function PurchasesPage() {
     return sum + (v ? Number(v.price) * p.quantity : 0);
   }, 0);
 
+  const summary = [
+    { label: "Total orders", value: formatNumber(purchases.length), icon: ReceiptText },
+    { label: "Units", value: formatNumber(totalUnits), icon: ShoppingBag },
+    { label: "Value", value: formatCurrency(totalSpend), icon: WalletCards },
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Page header */}
-      <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-600 text-white">
-          <ShoppingBag size={20} />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">
-            {isAdmin ? "All Purchases" : "My Purchases"}
-          </h1>
-          <p className="text-sm text-slate-500">
-            {isAdmin
-              ? "Complete purchase history across all customers"
-              : `Logged in as ${user?.firstName} ${user?.lastName}`}
-          </p>
-        </div>
-      </div>
+      <section className="surface p-5 sm:p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-700">
+          {isAdmin ? "Global registry" : "Purchase history"}
+        </p>
+        <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
+          {isAdmin ? "Transactions" : "My orders"}
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+          {isAdmin
+            ? "Track every completed vehicle purchase across customers."
+            : "Review your completed purchases and order value."}
+        </p>
+      </section>
 
-      {/* Summary cards */}
-      {!purchasesLoading && !purchasesError && (
+      {!purchasesLoading && !purchasesError && purchases.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-3">
-          <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow-sm">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
-              <Receipt size={20} />
+          {summary.map(({ label, value, icon: Icon }) => (
+            <div key={label} className="surface p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-500">{label}</p>
+                  <p className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
+                    {value}
+                  </p>
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700 ring-1 ring-amber-100">
+                  <Icon size={19} />
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                Total Orders
-              </p>
-              <p className="mt-0.5 text-2xl font-bold text-slate-800">
-                {purchases.length}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow-sm">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-              <ShoppingBag size={20} />
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                Units Purchased
-              </p>
-              <p className="mt-0.5 text-2xl font-bold text-slate-800">
-                {totalUnits}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 rounded-xl bg-white p-5 shadow-sm">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-              <TrendingUp size={20} />
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                {isAdmin ? "Total Revenue" : "Total Spent"}
-              </p>
-              <p className="mt-0.5 text-2xl font-bold text-slate-800">
-                {formatCurrency(totalSpend)}
-              </p>
-            </div>
-          </div>
+          ))}
         </div>
       )}
 
-      {/* Purchase table */}
       {purchasesLoading ? (
-        <div className="flex h-40 items-center justify-center text-slate-400">
-          Loading purchases…
-        </div>
+        <div className="surface shimmer-effect h-56 w-full" />
       ) : purchasesError ? (
-        <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-600">
-          Failed to load purchases. Please try again.
+        <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700">
+          Failed to load transactions.
         </div>
       ) : (
         <PurchaseTable
