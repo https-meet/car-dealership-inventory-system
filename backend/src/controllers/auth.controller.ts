@@ -14,7 +14,6 @@ export const login = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  console.log("Login Body:", req.body);
 
   const response = await authService.loginUser(req.body);
 

@@ -1,3 +1,4 @@
+import { Role } from "@prisma/client";
 import { z } from "zod";
 
 export const registerSchema = z.object({
@@ -5,4 +6,5 @@ export const registerSchema = z.object({
   lastName: z.string().trim().min(2),
   email: z.string().email(),
   password: z.string().min(6),
+  role: z.nativeEnum(Role).optional(),
 });
