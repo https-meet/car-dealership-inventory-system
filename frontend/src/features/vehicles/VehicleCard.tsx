@@ -34,7 +34,7 @@ export default function VehicleCard({ vehicle, onBuy }: Props) {
   const gradient = categoryTone[vehicle.category] ?? categoryTone.SEDAN;
 
   return (
-    <article className="group min-h-full overflow-hidden rounded-3xl border border-white/80 bg-white/90 shadow-xl shadow-slate-200/60 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-teal-950/10">
+    <article className="group flex min-h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
       <div className={`relative aspect-[16/10] overflow-hidden bg-gradient-to-br ${gradient}`}>
         {vehicle.imageUrl ? (
           <img

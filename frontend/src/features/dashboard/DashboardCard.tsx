@@ -10,11 +10,11 @@ interface DashboardCardProps {
 }
 
 const tones = {
-  teal: "bg-teal-50 text-teal-700 ring-teal-100",
-  amber: "bg-amber-50 text-amber-700 ring-amber-100",
-  sky: "bg-sky-50 text-sky-700 ring-sky-100",
-  rose: "bg-rose-50 text-rose-700 ring-rose-100",
-  slate: "bg-slate-100 text-slate-700 ring-slate-200",
+  teal:  { icon: "text-emerald-600 bg-emerald-50",  num: "text-emerald-600" },
+  amber: { icon: "text-amber-600 bg-amber-50",      num: "text-amber-600" },
+  sky:   { icon: "text-sky-600 bg-sky-50",          num: "text-sky-600" },
+  rose:  { icon: "text-rose-600 bg-rose-50",        num: "text-rose-600" },
+  slate: { icon: "text-slate-600 bg-slate-100",     num: "text-slate-900" },
 };
 
 export default function DashboardCard({
@@ -24,27 +24,19 @@ export default function DashboardCard({
   tone = "slate",
   suffix,
 }: DashboardCardProps) {
+  const t = tones[tone];
   return (
-    <div className="premium-surface p-5 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-teal-950/10">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold text-slate-500">{title}</p>
-          <div className="mt-3 flex items-baseline gap-1.5">
-            <h3 className="text-3xl font-bold tracking-tight text-slate-950">
-              {formatNumber(value)}
-            </h3>
-            {suffix && (
-              <span className="text-sm font-semibold text-slate-400">
-                {suffix}
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ring-1 ${tones[tone]}`}
-        >
-          <Icon size={19} strokeWidth={2.2} />
+    <div className="surface p-5 flex flex-col gap-3 hover:shadow-md transition-shadow">
+      <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${t.icon}`}>
+        <Icon size={18} />
+      </div>
+      <div>
+        <p className="text-xs font-medium text-slate-500">{title}</p>
+        <div className="flex items-baseline gap-1 mt-1">
+          <span className={`text-2xl font-bold tracking-tight ${t.num}`}>
+            {formatNumber(value)}
+          </span>
+          {suffix && <span className="text-xs text-slate-400">{suffix}</span>}
         </div>
       </div>
     </div>

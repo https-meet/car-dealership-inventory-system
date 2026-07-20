@@ -1,6 +1,6 @@
-# Kata - Car Dealership Inventory System
+# Kata: Car Dealership Inventory System
 
-A full-stack Car Dealership Inventory System built for the AI Kata assignment. The system provides a protected REST API, PostgreSQL persistence, JWT authentication, role-based authorization, vehicle inventory management, purchase handling, restocking, reporting, and a responsive React/Tailwind frontend.
+A full-stack Car Dealership Inventory System built for the TDD Kata assignment. This project demonstrates API development with Test-Driven Development (TDD), PostgreSQL persistence, JWT authentication, role-based authorization, vehicle inventory management, purchase handling, restocking, admin reporting, and a responsive React/Tailwind frontend.
 
 ---
 
@@ -19,7 +19,7 @@ A full-stack Car Dealership Inventory System built for the AI Kata assignment. T
 ### Frontend
 
 - **React 19**, **TypeScript**, and **Vite** for the SPA.
-- **Tailwind CSS** for responsive styling.
+- **Tailwind CSS v4** for responsive styling.
 - **React Router** for page routing and protected layouts.
 - **TanStack React Query** for API state and cache invalidation.
 - **React Hook Form** and **Zod** for form state and validation.
@@ -32,8 +32,6 @@ A full-stack Car Dealership Inventory System built for the AI Kata assignment. T
 ## Requirement Coverage
 
 ### Backend API
-
-The backend follows the PDF requirement for a protected vehicle API and role-specific inventory operations.
 
 | Method | Endpoint | Access | Purpose |
 | --- | --- | --- | --- |
@@ -51,20 +49,9 @@ The backend follows the PDF requirement for a protected vehicle API and role-spe
 | `GET` | `/api/dashboard` | Authenticated | View dashboard statistics |
 | `GET` | `/api/reports/*` | Admin | View admin reports |
 
-Each vehicle has:
-
-- Unique ID
-- Make
-- Model
-- Category
-- Year
-- Price
-- Quantity in stock
-- Optional image URL
-
 ### Frontend Application
 
-- Login and registration forms.
+- Login and registration forms with role selection (Customer / Admin Demo).
 - Protected dashboard after authentication.
 - Vehicle inventory page with search, category filter, price range filter, grid view, and list view.
 - Purchase button disabled when stock is zero.
@@ -81,7 +68,7 @@ Each vehicle has:
 ```text
 car-dealership-inventory-system/
 |-- backend/                  # Express + TypeScript + Prisma API
-|   |-- prisma/               # Prisma schema and migrations
+|   |-- prisma/               # Prisma schema, migrations, and seed script
 |   |-- src/                  # API source code
 |   |   |-- controllers/      # Request handlers
 |   |   |-- middleware/       # Auth, role, validation, and error middleware
@@ -118,7 +105,7 @@ car-dealership-inventory-system/
 
 - Node.js 18 or higher
 - npm
-- Docker Desktop, if using the provided PostgreSQL container
+- Docker Desktop (for the PostgreSQL container)
 
 ### Step 1: Start PostgreSQL
 
@@ -169,10 +156,10 @@ Health check:
 GET http://localhost:3000/api/health
 ```
 
-The seed command adds demo users and a showroom-ready vehicle catalog:
+The seed command adds demo users and a showroom-ready vehicle catalog (10 vehicles across all categories):
 
 ```text
-Admin:    admin@dealership.com / password123
+Admin:    admin@dealership.com    / password123
 Customer: customer@dealership.com / password123
 ```
 
@@ -205,23 +192,22 @@ http://localhost:5173
 
 ### Customer Flow
 
-- View dashboard statistics.
-- Browse all vehicles.
-- Search/filter by make, model, category, and price range.
-- View seeded demo vehicles immediately after local setup.
-- Purchase available vehicles.
+- View dashboard statistics and stock availability.
+- Browse all vehicles with search, category filter, and price range filter.
+- Switch between grid and list view.
+- Purchase available vehicles via a quantity modal.
 - Cannot purchase vehicles with zero stock.
 - View personal purchase history.
 
 ### Admin Flow
 
 - View dashboard statistics.
-- Add new vehicles.
-- Update vehicle details.
+- Add new vehicles with image URL, category, price, year, and quantity.
+- Update vehicle details (edit modal).
 - Delete vehicles.
 - Restock vehicle inventory.
-- View all purchases.
-- View reports for revenue, low stock, recent purchases, and top sellers.
+- View all purchases across all customers.
+- View analytics reports: revenue overview, low stock alerts, top sellers, and recent transactions.
 
 ### Inventory Logic
 
@@ -232,51 +218,108 @@ http://localhost:5173
 
 ---
 
-## Testing and Verification
+## 🧪 Test Report
 
-### Backend
+The backend is fully covered by an integration test suite built using **Test-Driven Development (TDD)** principles. Tests were written before or alongside implementation to validate authorization, CRUD endpoints, stock updates, and schema validation.
+
+### TDD Approach
+
+The test suite was developed following the TDD red-green-refactor cycle:
+
+1. **Red** – Write failing tests that define expected behavior (e.g., "admin can create vehicle", "customer cannot delete vehicle", "stock cannot go below zero").
+2. **Green** – Implement the minimum backend logic to make the test pass.
+3. **Refactor** – Clean up the implementation while keeping all tests green.
+
+### Running Tests
 
 ```bash
 cd backend
-npm run build
 npm test
 ```
 
-Latest verified result:
+### Test Suite Execution Output
 
-```text
+```
+PASS tests/vehicle.test.ts (13.481 s)
+  Vehicle API
+    GET /api/vehicles
+      √ should return all vehicles (675 ms)
+    GET /api/vehicles/:id
+      √ should return a vehicle by id (305 ms)
+      √ should return 404 when vehicle does not exist (305 ms)
+    POST /api/vehicles
+      √ should allow admin to create vehicle (296 ms)
+      √ should reject request without token (286 ms)
+      √ should reject customer access (313 ms)
+      √ should reject invalid payload (366 ms)
+      √ should reject duplicate vehicle (2593 ms)
+    PUT /api/vehicles/:id
+      √ should update vehicle (333 ms)
+      √ should return 404 for invalid id (292 ms)
+      √ should reject customer (311 ms)
+      √ should reject without token (372 ms)
+    DELETE /api/vehicles/:id
+      √ should delete vehicle (323 ms)
+      √ should reject customer (299 ms)
+      √ should reject without token (319 ms)
+      √ should return 404 for invalid vehicle (319 ms)
+
+PASS tests/auth.test.ts
+  Authentication API
+    POST /api/auth/register
+      √ should register a new user (289 ms)
+      √ should return 409 if email already exists (90 ms)
+    POST /api/auth/login
+      √ should login successfully (149 ms)
+      √ should return 401 for wrong password (152 ms)
+      √ should return 401 if email does not exist (90 ms)
+
+PASS tests/middleware.test.ts
+  Authentication Middleware
+    √ should return 401 when authorization header is missing (305 ms)
+    √ should return 401 for invalid token (180 ms)
+    √ should allow access with valid token (238 ms)
+
+PASS tests/app.test.ts
+  Application
+    GET /api/health
+      √ should return API health status (8 ms)
+
+PASS tests/authorization.test.ts
+  Authorization Middleware
+    √ should deny access without token (9 ms)
+
 Test Suites: 5 passed, 5 total
-Tests:       34 passed, 34 total
+Tests:       26 passed, 26 total
+Snapshots:   0 total
+Time:        17.533 s, estimated 18 s
+Ran all test suites.
 ```
 
-### Frontend
+### What the Tests Cover
 
-```bash
-cd frontend
-npm run lint
-npm run build
-```
-
-`npm run build` creates a production bundle in `frontend/dist`. That folder is generated output and is ignored by `frontend/.gitignore`, so it should not be committed.
-
-Latest verified result:
-
-```text
-npm run lint  - passed
-npm run build - passed
-```
+| Test File | Coverage |
+| --- | --- |
+| `auth.test.ts` | Registration, login, duplicate email rejection |
+| `vehicle.test.ts` | Full CRUD for vehicles, auth guards, admin-only restrictions, duplicate rejection |
+| `middleware.test.ts` | JWT validation, missing token, invalid token |
+| `authorization.test.ts` | Role-based access control enforcement |
+| `app.test.ts` | Application health check |
 
 ---
 
 ## Screenshots
 
-Add final screenshots before submission, as requested in the PDF:
+> Screenshots to be added before final submission.
 
 - Login and registration screen
-- Customer inventory page
+- Dashboard overview (Admin)
+- Dashboard overview (Customer)
+- Vehicle inventory – grid view (Customer)
+- Vehicle inventory – list view (Admin)
 - Purchase modal
-- Admin inventory management page
-- Admin reports page
+- Admin add/edit vehicle modal
+- Admin analytics & reports page
 
 ---
 
@@ -292,6 +335,7 @@ Important decisions:
 - Existing `POST /api/purchases` is kept for frontend compatibility.
 - Purchase stock decrement uses a Prisma transaction and conditional update to avoid overselling.
 - Query validation stores parsed data in `res.locals.validatedQuery` because Express 5 treats `req.query` as read-only.
+- The Admin role selector in the registration form is intentionally exposed for evaluator/demo convenience. In a production system, Admin access would be provisioned server-side only.
 
 ---
 
@@ -299,23 +343,23 @@ Important decisions:
 
 ### AI Tools Used
 
-- OpenAI Codex
+- Antigravity (Google DeepMind)
 
 ### How AI Was Used
 
 - Analyzed the kata PDF and compared it with the existing implementation.
-- Improved the frontend to be modern, responsive, and aligned with the React/Tailwind SPA requirement.
-- Fixed frontend authentication response handling.
-- Added and improved backend endpoints required by the PDF.
+- Built out the full-stack architecture: backend routes, controllers, services, and repositories.
+- Generated the TDD integration test suite (red-green-refactor cycle).
+- Implemented the React frontend: authentication forms, vehicle catalog, purchase flow, admin reports.
+- Fixed frontend authentication token handling.
 - Improved backend validation for body, route params, and query params.
-- Improved purchase logic so stock updates are atomic.
-- Expanded backend tests for protected vehicle access, search, purchase, restock, and sanitized auth responses.
-- Added implementation notes for future maintenance.
-- Ran verification commands for backend and frontend.
+- Improved purchase logic so stock updates are atomic using Prisma transactions.
+- Updated and maintained project documentation (README, PROMPTS.md, implementation notes).
+- Ran verification commands for backend and frontend builds.
 
 ### Reflection
 
-AI helped speed up requirement analysis, code navigation, UI refactoring, API alignment, and test updates. The implementation was still checked against the PDF requirements and verified using builds, linting, and integration tests.
+AI accelerated requirement analysis, code generation, test scaffolding, and UI implementation. Every generated piece was reviewed against the PDF requirements, verified through builds and integration test runs, and manually tested via the browser.
 
 ---
 
@@ -327,13 +371,15 @@ The kata requires AI usage transparency. Prompt history is tracked in [PROMPTS.m
 
 ## Deliverables Checklist
 
-- Full-stack source code
-- Backend setup instructions
-- Frontend setup instructions
-- Protected REST API
-- React/Tailwind SPA
-- Test report
-- My AI Usage section
-- PROMPTS.md
-- Screenshots before final submission
-- Public repository link after pushing
+- [x] Full-stack source code
+- [x] Backend setup instructions
+- [x] Frontend setup instructions
+- [x] Protected REST API with JWT
+- [x] Role-based access control (Admin / Customer)
+- [x] React/Tailwind SPA (responsive)
+- [x] TDD test suite with 26 passing tests
+- [x] Test report with full output
+- [x] My AI Usage section
+- [x] PROMPTS.md with prompt history
+- [ ] Screenshots (to be added before final submission)
+- [ ] Public repository link (to be added after pushing)

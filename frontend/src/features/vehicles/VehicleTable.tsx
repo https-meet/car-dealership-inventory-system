@@ -14,7 +14,19 @@ interface Props {
 function stockDot(quantity: number) {
   if (quantity === 0) return "bg-rose-500";
   if (quantity <= 3) return "bg-amber-500";
-  return "bg-teal-500";
+  return "bg-emerald-500";
+}
+
+function stockBadge(quantity: number) {
+  if (quantity === 0) return "badge-red";
+  if (quantity <= 3) return "badge-amber";
+  return "badge-green";
+}
+
+function stockText(quantity: number) {
+  if (quantity === 0) return "Out of stock";
+  if (quantity <= 3) return `${quantity} – Low`;
+  return `${quantity}`;
 }
 
 export default function VehicleTable({ vehicles, onEdit, onBuy }: Props) {
@@ -44,7 +56,7 @@ export default function VehicleTable({ vehicles, onEdit, onBuy }: Props) {
           const isOutOfStock = vehicle.quantity === 0;
 
           return (
-            <article key={vehicle.id} className="premium-surface p-4">
+            <article key={vehicle.id} className="surface p-4">
               <div className="flex gap-3">
                 {vehicle.imageUrl ? (
                   <img
@@ -75,9 +87,11 @@ export default function VehicleTable({ vehicles, onEdit, onBuy }: Props) {
               </div>
 
               <div className="mt-4 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                  <span className={`status-dot ${stockDot(vehicle.quantity)}`} />
-                  {vehicle.quantity} in stock
+                <div className="flex items-center gap-2">
+                  <span className={stockBadge(vehicle.quantity)}>
+                    <span className={`inline-block h-1.5 w-1.5 rounded-full ${stockDot(vehicle.quantity)}`} />
+                    {stockText(vehicle.quantity)}
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -118,7 +132,7 @@ export default function VehicleTable({ vehicles, onEdit, onBuy }: Props) {
         })}
       </div>
 
-      <div className="premium-surface hidden overflow-hidden md:block">
+      <div className="surface-elevated hidden overflow-hidden md:block">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
@@ -168,10 +182,10 @@ export default function VehicleTable({ vehicles, onEdit, onBuy }: Props) {
                       {formatCurrency(vehicle.price)}
                     </td>
                     <td className="px-5 py-4">
-                      <div className="flex items-center gap-2 font-semibold text-slate-700">
-                        <span className={`status-dot ${stockDot(vehicle.quantity)}`} />
-                        {vehicle.quantity}
-                      </div>
+                      <span className={stockBadge(vehicle.quantity)}>
+                        <span className={`inline-block h-1.5 w-1.5 rounded-full ${stockDot(vehicle.quantity)}`} />
+                        {stockText(vehicle.quantity)}
+                      </span>
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center justify-end gap-2">

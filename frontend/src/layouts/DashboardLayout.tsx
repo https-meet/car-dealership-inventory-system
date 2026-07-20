@@ -7,17 +7,17 @@ export default function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="app-bg flex min-h-screen overflow-hidden text-slate-950">
+    <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-950">
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Navbar onMenuClick={() => setIsSidebarOpen((v) => !v)} />
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <Navbar onMenuClick={() => setIsSidebarOpen(true)} />
 
-        <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8">
-          <div className="mx-auto w-full max-w-7xl animate-fade-in">
+        <main className="flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
             <Outlet />
           </div>
         </main>
