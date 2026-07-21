@@ -15,11 +15,9 @@ const rankColors = [
 export default function TopSellingTable({ entries }: Props) {
   if (entries.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 bg-white py-10 text-center">
+      <div className="card flex flex-col items-center justify-center py-16 text-center border-dashed">
         <Trophy size={30} className="mb-2 text-slate-300" />
-        <p className="text-sm font-semibold text-slate-700">
-          No sales data available yet.
-        </p>
+        <p className="text-sm font-semibold text-slate-700">No sales data available yet.</p>
       </div>
     );
   }
@@ -33,10 +31,7 @@ export default function TopSellingTable({ entries }: Props) {
           const rankClass = rankColors[idx] ?? "bg-slate-100 text-slate-700";
 
           return (
-            <article
-              key={v?.id ?? idx}
-              className="rounded-lg border border-slate-200 bg-white p-4"
-            >
+            <article key={v?.id ?? idx} className="card p-4">
               <div className="flex items-start gap-3">
                 <span
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${rankClass}`}
@@ -71,7 +66,7 @@ export default function TopSellingTable({ entries }: Props) {
         })}
       </div>
 
-      <div className="hidden overflow-hidden rounded-lg border border-slate-200 md:block">
+      <div className="hidden md:block card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">

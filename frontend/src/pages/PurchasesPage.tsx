@@ -9,11 +9,7 @@ import { formatCurrency, formatNumber } from "../utils/format";
 export default function PurchasesPage() {
   const isAdmin = useIsAdmin();
 
-  const {
-    data: purchasesData,
-    isLoading: purchasesLoading,
-    isError: purchasesError,
-  } = useQuery({
+  const { data: purchasesData, isLoading, isError } = useQuery({
     queryKey: ["purchases"],
     queryFn: getPurchases,
   });
@@ -24,69 +20,59 @@ export default function PurchasesPage() {
   });
 
   const purchases = purchasesData?.data ?? [];
-  const vehicles = vehiclesData?.data ?? [];
+  const vehicles  = vehiclesData?.data  ?? [];
 
-  const totalUnits = purchases.reduce((sum, p) => sum + p.quantity, 0);
   const vehicleMap = new Map(vehicles.map((v) => [v.id, v]));
-  const totalSpend = purchases.reduce((sum, p) => {
+  const totalUnits = purchases.reduce((s, p) => s + p.quantity, 0);
+  const totalValue = purchases.reduce((s, p) => {
     const v = vehicleMap.get(p.vehicleId);
-    return sum + (v ? Number(v.price) * p.quantity : 0);
+    return s + (v ? Number(v.price) * p.quantity : 0);
   }, 0);
 
-  const summary = [
-    { label: "Total orders", value: formatNumber(purchases.length), icon: ReceiptText },
-    { label: "Units", value: formatNumber(totalUnits), icon: ShoppingBag },
-    { label: "Value", value: formatCurrency(totalSpend), icon: WalletCards },
-  ];
-
   return (
-    <div className="space-y-6">
-      <section className="surface p-5 sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-700">
-          {isAdmin ? "Global registry" : "Purchase history"}
-        </p>
-        <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
-          {isAdmin ? "Transactions" : "My orders"}
+    <div className="space-y-6 animate-fade-up">
+      {/* Page header */}
+      <div>
+        <h2 className="text-2xl font-bold text-slate-900">
+          {isAdmin ? "Transactions" : "My Orders"}
         </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+        <p className="text-sm text-slate-500 mt-0.5">
           {isAdmin
-            ? "Track every completed vehicle purchase across customers."
+            ? "Complete purchase history across all customers."
             : "Review your completed purchases and order value."}
         </p>
-      </section>
+      </div>
 
-      {!purchasesLoading && !purchasesError && purchases.length > 0 && (
+      {/* Summary cards */}
+      {!isLoading && !isError && purchases.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-3">
-          {summary.map(({ label, value, icon: Icon }) => (
-            <div key={label} className="surface p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-slate-500">{label}</p>
-                  <p className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
-                    {value}
-                  </p>
-                </div>
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700 ring-1 ring-amber-100">
-                  <Icon size={19} />
-                </div>
+          {[
+            { label: "Total Orders",  value: formatNumber(purchases.length), icon: ReceiptText },
+            { label: "Units Sold",    value: formatNumber(totalUnits),        icon: ShoppingBag },
+            { label: "Total Value",   value: formatCurrency(totalValue),      icon: WalletCards },
+          ].map(({ label, value, icon: Icon }) => (
+            <div key={label} className="card p-5 flex items-center gap-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+                <Icon size={18} />
+              </div>
+              <div>
+                <p className="text-xs font-medium text-slate-500">{label}</p>
+                <p className="text-xl font-bold text-slate-900 mt-0.5">{value}</p>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {purchasesLoading ? (
-        <div className="surface shimmer-effect h-56 w-full" />
-      ) : purchasesError ? (
-        <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700">
-          Failed to load transactions.
+      {/* Table */}
+      {isLoading ? (
+        <div className="skeleton h-56 w-full rounded-2xl" />
+      ) : isError ? (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
+          Failed to load transactions. Please refresh.
         </div>
       ) : (
-        <PurchaseTable
-          purchases={purchases}
-          vehicles={vehicles}
-          showCustomer={isAdmin}
-        />
+        <PurchaseTable purchases={purchases} vehicles={vehicles} showCustomer={isAdmin} />
       )}
     </div>
   );

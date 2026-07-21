@@ -9,7 +9,7 @@ interface Props {
 export default function RecentPurchasesTable({ purchases }: Props) {
   if (purchases.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-200 bg-white py-10 text-center">
+      <div className="card flex flex-col items-center justify-center py-16 text-center border-dashed">
         <Clock size={30} className="mb-2 text-slate-300" />
         <p className="text-sm font-semibold text-slate-700">No purchases yet.</p>
       </div>
@@ -22,7 +22,7 @@ export default function RecentPurchasesTable({ purchases }: Props) {
         {purchases.map((p) => {
           const total = Number(p.vehicle.price) * p.quantity;
           return (
-            <article key={p.id} className="rounded-lg border border-slate-200 bg-white p-4">
+            <article key={p.id} className="card p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="font-bold text-slate-950">
@@ -50,7 +50,7 @@ export default function RecentPurchasesTable({ purchases }: Props) {
         })}
       </div>
 
-      <div className="hidden overflow-hidden rounded-lg border border-slate-200 md:block">
+      <div className="hidden md:block card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">

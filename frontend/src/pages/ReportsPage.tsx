@@ -4,20 +4,7 @@ import SalesSummaryCard from "../features/reports/SalesSummaryCard";
 import LowStockTable from "../features/reports/LowStockTable";
 import RecentPurchasesTable from "../features/reports/RecentPurchasesTable";
 import TopSellingTable from "../features/reports/TopSellingTable";
-import {
-  getLowStock,
-  getRecentPurchases,
-  getTopSelling,
-  getSalesSummary,
-} from "../services/report.service";
-
-interface ReportSectionProps {
-  title: string;
-  count?: number;
-  isLoading: boolean;
-  isError: boolean;
-  children: ReactNode;
-}
+import { getLowStock, getRecentPurchases, getTopSelling, getSalesSummary } from "../services/report.service";
 
 function ReportSection({
   title,
@@ -25,22 +12,26 @@ function ReportSection({
   isLoading,
   isError,
   children,
-}: ReportSectionProps) {
+}: {
+  title: string;
+  count?: number;
+  isLoading: boolean;
+  isError: boolean;
+  children: ReactNode;
+}) {
   return (
-    <section className="surface overflow-hidden">
-      <div className="flex items-center justify-between gap-4 border-b border-slate-200 bg-slate-50 px-5 py-4">
-        <h3 className="text-sm font-bold text-slate-950">{title}</h3>
+    <section className="card overflow-hidden">
+      <div className="flex items-center justify-between gap-4 border-b border-slate-100 bg-slate-50/70 px-5 py-3.5">
+        <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
         {count !== undefined && !isLoading && !isError && (
-          <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-500">
-            {count} items
-          </span>
+          <span className="badge-slate">{count} items</span>
         )}
       </div>
       <div className="p-5">
         {isLoading ? (
-          <div className="shimmer-effect h-36 w-full rounded-lg border border-slate-200 bg-slate-50" />
+          <div className="skeleton h-36 w-full" />
         ) : isError ? (
-          <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm font-semibold text-rose-700">
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700">
             Failed to load data.
           </div>
         ) : (
@@ -54,40 +45,30 @@ function ReportSection({
 export default function ReportsPage() {
   const [lowStock, recentPurchases, topSelling, salesSummary] = useQueries({
     queries: [
-      { queryKey: ["reports", "low-stock"], queryFn: () => getLowStock(5) },
+      { queryKey: ["reports", "low-stock"],        queryFn: () => getLowStock(5) },
       { queryKey: ["reports", "recent-purchases"], queryFn: () => getRecentPurchases(10) },
-      { queryKey: ["reports", "top-selling"], queryFn: () => getTopSelling(10) },
-      { queryKey: ["reports", "sales-summary"], queryFn: getSalesSummary },
+      { queryKey: ["reports", "top-selling"],      queryFn: () => getTopSelling(10) },
+      { queryKey: ["reports", "sales-summary"],    queryFn: getSalesSummary },
     ],
   });
 
   return (
-    <div className="space-y-6">
-      <section className="surface p-5 sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-teal-700">
-          Admin analytics
+    <div className="space-y-6 animate-fade-up">
+      {/* Page header */}
+      <div>
+        <h2 className="text-2xl font-bold text-slate-900">Analytics</h2>
+        <p className="text-sm text-slate-500 mt-0.5">
+          Revenue overview, inventory health, and top-performing vehicles.
         </p>
-        <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">
-          Reports
-        </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-          Monitor revenue, low stock vehicles, recent purchases, and top sellers.
-        </p>
-      </section>
+      </div>
 
-      <ReportSection
-        title="Revenue overview"
-        isLoading={salesSummary.isLoading}
-        isError={salesSummary.isError}
-      >
-        {salesSummary.data && (
-          <SalesSummaryCard summary={salesSummary.data.data} />
-        )}
+      <ReportSection title="Revenue Overview" isLoading={salesSummary.isLoading} isError={salesSummary.isError}>
+        {salesSummary.data && <SalesSummaryCard summary={salesSummary.data.data} />}
       </ReportSection>
 
       <div className="grid gap-6 xl:grid-cols-2">
         <ReportSection
-          title="Low stock alerts"
+          title="Low Stock Alerts"
           count={lowStock.data?.data.length}
           isLoading={lowStock.isLoading}
           isError={lowStock.isError}
@@ -96,7 +77,7 @@ export default function ReportsPage() {
         </ReportSection>
 
         <ReportSection
-          title="Top sellers"
+          title="Top Sellers"
           count={topSelling.data?.data.length}
           isLoading={topSelling.isLoading}
           isError={topSelling.isError}
@@ -106,14 +87,12 @@ export default function ReportsPage() {
       </div>
 
       <ReportSection
-        title="Recent transactions"
+        title="Recent Transactions"
         count={recentPurchases.data?.data.length}
         isLoading={recentPurchases.isLoading}
         isError={recentPurchases.isError}
       >
-        {recentPurchases.data && (
-          <RecentPurchasesTable purchases={recentPurchases.data.data} />
-        )}
+        {recentPurchases.data && <RecentPurchasesTable purchases={recentPurchases.data.data} />}
       </ReportSection>
     </div>
   );

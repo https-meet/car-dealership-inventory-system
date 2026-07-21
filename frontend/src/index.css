@@ -80,15 +80,31 @@
            disabled:cursor-not-allowed disabled:opacity-50;
   }
 
-  /* Stock / status badges */
+  /* Stock / status badges — each variant is fully self-contained.
+     Tailwind v4 @apply cannot reference custom classes, only built-in utilities. */
   .badge {
     @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold;
   }
-  .badge-green  { @apply badge bg-emerald-50  text-emerald-700 ring-1 ring-emerald-200; }
-  .badge-amber  { @apply badge bg-amber-50    text-amber-700   ring-1 ring-amber-200;   }
-  .badge-red    { @apply badge bg-red-50      text-red-700     ring-1 ring-red-200;     }
-  .badge-slate  { @apply badge bg-slate-100   text-slate-600   ring-1 ring-slate-200;   }
-  .badge-blue   { @apply badge bg-blue-50     text-blue-700    ring-1 ring-blue-200;    }
+  .badge-green {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold
+           bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200;
+  }
+  .badge-amber {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold
+           bg-amber-50 text-amber-700 ring-1 ring-amber-200;
+  }
+  .badge-red {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold
+           bg-red-50 text-red-700 ring-1 ring-red-200;
+  }
+  .badge-slate {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold
+           bg-slate-100 text-slate-600 ring-1 ring-slate-200;
+  }
+  .badge-blue {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold
+           bg-blue-50 text-blue-700 ring-1 ring-blue-200;
+  }
 
   /* Skeleton shimmer */
   .skeleton {
