@@ -4,7 +4,7 @@
     "module": "CommonJS",
     "moduleResolution": "node",
 
-    "rootDir": "./",
+    "rootDir": "./src",
     "outDir": "./dist",
 
     "strict": true,
@@ -14,20 +14,18 @@
 
     "resolveJsonModule": true,
 
-    "types": ["node", "jest"],
-
     "sourceMap": true,
 
     "skipLibCheck": true
   },
 
   "include": [
-    "src",
-    "tests"
+    "src/**/*"
   ],
 
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "tests"
   ]
 }
