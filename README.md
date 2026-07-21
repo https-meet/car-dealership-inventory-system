@@ -29,6 +29,14 @@ A full-stack Car Dealership Inventory System built for the TDD Kata assignment. 
 
 ---
 
+## Live Demo & Deployment Links
+
+- 🌐 **Live Web Application (Vercel):** [https://car-dealership-inventory-system-rose.vercel.app](https://car-dealership-inventory-system-rose.vercel.app)
+- ⚡ **Live Backend API (Render):** [https://car-dealership-inventory-system-ajbu.onrender.com](https://car-dealership-inventory-system-ajbu.onrender.com)
+- 💾 **Database:** Cloud PostgreSQL (Render)
+
+---
+
 ## Screenshots
 
 ### Login & Registration
@@ -402,4 +410,5 @@ The kata requires AI usage transparency. Prompt history is tracked in [PROMPTS.m
 - [x] Screenshots of every key screen (10 screenshots)
 - [x] My AI Usage section
 - [x] PROMPTS.md with prompt history
-- [ ] Public repository link (to be added after pushing)
+- [x] Public repository link: [GitHub Repository](https://github.com/https-meet/car-dealership-inventory-system)
+- [x] Live Deployment URLs: [Frontend Web App](https://car-dealership-inventory-system-rose.vercel.app) \| [Backend API](https://car-dealership-inventory-system-ajbu.onrender.com)
