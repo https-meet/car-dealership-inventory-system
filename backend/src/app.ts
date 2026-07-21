@@ -1,3 +1,4 @@
+import "./types/express.d";
 import express from "express";
 import cors from "cors";
 import { Role } from "@prisma/client";
