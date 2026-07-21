@@ -8,7 +8,7 @@ A full-stack Car Dealership Inventory System built for the TDD Kata assignment. 
 
 ### Backend
 
-- **Node.js**, **Express**, and **TypeScript** for the REST API.
+- **Node.js**, **Express 5**, and **TypeScript** for the REST API.
 - **PostgreSQL** as the persistent database.
 - **Prisma ORM** for schema modeling, migrations, and database access.
 - **JWT authentication** for protected endpoints.
@@ -26,6 +26,36 @@ A full-stack Car Dealership Inventory System built for the TDD Kata assignment. 
 - **Axios** for API calls.
 - **Lucide React** for icons.
 - **React Hot Toast** for notifications.
+
+---
+
+## Screenshots
+
+### Login & Registration
+
+| Sign In | Register |
+|---|---|
+| ![Login page](docs/screenshots/01-login.png) | ![Register tab](docs/screenshots/02-register.png) |
+
+### Admin Workspace
+
+| Dashboard | Inventory Management |
+|---|---|
+| ![Admin dashboard](docs/screenshots/03-dashboard-admin.png) | ![Admin inventory](docs/screenshots/04-inventory-admin.png) |
+
+| Transactions (All Customers) | Analytics & Reports |
+|---|---|
+| ![Admin transactions](docs/screenshots/05-transactions-admin.png) | ![Analytics](docs/screenshots/06-analytics.png) |
+
+### Customer Workspace
+
+| Dashboard | Vehicle Catalog (Grid) |
+|---|---|
+| ![Customer dashboard](docs/screenshots/07-dashboard-customer.png) | ![Inventory grid](docs/screenshots/08-inventory-grid.png) |
+
+| Purchase Modal | Order History |
+|---|---|
+| ![Purchase modal](docs/screenshots/09-purchase-modal.png) | ![Customer transactions](docs/screenshots/10-transactions-customer.png) |
 
 ---
 
@@ -51,14 +81,14 @@ A full-stack Car Dealership Inventory System built for the TDD Kata assignment. 
 
 ### Frontend Application
 
-- Login and registration forms with role selection (Customer / Admin Demo).
+- Login and registration forms with role selection (Customer / Admin — see note below).
 - Protected dashboard after authentication.
 - Vehicle inventory page with search, category filter, price range filter, grid view, and list view.
 - Purchase button disabled when stock is zero.
 - Customer purchase modal with quantity validation and estimated total.
 - Customer purchase history.
 - Admin add, edit, delete, and restock flows.
-- Admin reports for sales summary, low stock, recent purchases, and top-selling vehicles.
+- Admin reports for sales summary, low stock alerts, recent purchases, and top-selling vehicles.
 - Responsive UI for desktop and mobile screens.
 
 ---
@@ -79,7 +109,7 @@ car-dealership-inventory-system/
 |   |   `-- validators/       # Zod request schemas
 |   `-- tests/                # Jest + Supertest integration tests
 |-- frontend/                 # React + Vite + Tailwind SPA
-|   |-- public/               # Static assets
+|   |-- public/               # Static assets (favicon, icons)
 |   `-- src/
 |       |-- api/              # Axios instance
 |       |-- components/       # Shared UI and layout components
@@ -91,7 +121,7 @@ car-dealership-inventory-system/
 |       |-- services/         # API service wrappers
 |       |-- types/            # Frontend TypeScript types
 |       `-- utils/            # Shared formatting helpers
-|-- docs/                     # Developer notes
+|-- docs/                     # Developer notes and screenshots
 |-- docker-compose.yml        # PostgreSQL container
 |-- PROMPTS.md                # AI prompt history
 `-- README.md                 # Project documentation
@@ -186,35 +216,39 @@ http://localhost:5173
 ### Authentication
 
 - Users can register and login.
-- Login returns a JWT token.
-- The frontend stores the token and sends it with protected API requests.
-- Auth responses return public user data only; password hashes are never returned.
+- Login returns a JWT token stored in `localStorage`.
+- The frontend sends the token with every protected API request via an Axios interceptor.
+- Auth responses return public user data only — password hashes are never returned.
 
 ### Customer Flow
 
 - View dashboard statistics and stock availability.
 - Browse all vehicles with search, category filter, and price range filter.
 - Switch between grid and list view.
-- Purchase available vehicles via a quantity modal.
-- Cannot purchase vehicles with zero stock.
+- Purchase available vehicles via a quantity modal with estimated total preview.
+- Cannot purchase vehicles with zero stock (button disabled).
 - View personal purchase history.
 
 ### Admin Flow
 
-- View dashboard statistics.
-- Add new vehicles with image URL, category, price, year, and quantity.
-- Update vehicle details (edit modal).
-- Delete vehicles.
+- View full dashboard statistics including all customer counts.
+- Add new vehicles with make, model, category, year, price, quantity, and optional image URL.
+- Update vehicle details via an edit modal.
+- Delete vehicles from the catalog.
 - Restock vehicle inventory.
-- View all purchases across all customers.
-- View analytics reports: revenue overview, low stock alerts, top sellers, and recent transactions.
+- View all purchases across every customer.
+- Access analytics reports: revenue overview, low stock alerts, top sellers, and recent transactions.
 
 ### Inventory Logic
 
 - Vehicle creation rejects invalid price, invalid year, negative quantity, and duplicate make/model/year entries.
-- Purchase stock updates are transactional.
+- Purchase stock updates are wrapped in a Prisma transaction.
 - The backend prevents stock from going below zero.
-- Restock is restricted to admins.
+- Restock is restricted to admins only.
+
+### Note on Admin Role in Registration
+
+The registration form includes an account type selector (Customer / Admin). This selector is intentionally exposed for evaluator and assessment convenience — it allows reviewers to test both roles without needing a pre-seeded admin account. In a production system, Admin access would be provisioned server-side only and would never be selectable from a public registration form.
 
 ---
 
@@ -224,11 +258,11 @@ The backend is fully covered by an integration test suite built using **Test-Dri
 
 ### TDD Approach
 
-The test suite was developed following the TDD red-green-refactor cycle:
+The test suite follows the classic red-green-refactor cycle:
 
-1. **Red** – Write failing tests that define expected behavior (e.g., "admin can create vehicle", "customer cannot delete vehicle", "stock cannot go below zero").
-2. **Green** – Implement the minimum backend logic to make the test pass.
-3. **Refactor** – Clean up the implementation while keeping all tests green.
+1. **Red** — Write a failing test that defines the expected behavior (e.g. "admin can create a vehicle", "customer cannot delete a vehicle", "stock cannot go below zero").
+2. **Green** — Implement the minimum backend logic to make that test pass.
+3. **Refactor** — Clean up the implementation without breaking any passing tests.
 
 ### Running Tests
 
@@ -237,57 +271,57 @@ cd backend
 npm test
 ```
 
-### Test Suite Execution Output
+### Test Suite Results
 
 ```
 PASS tests/vehicle.test.ts (13.481 s)
   Vehicle API
     GET /api/vehicles
-      √ should return all vehicles (675 ms)
+      ✓ should return all vehicles (675 ms)
     GET /api/vehicles/:id
-      √ should return a vehicle by id (305 ms)
-      √ should return 404 when vehicle does not exist (305 ms)
+      ✓ should return a vehicle by id (305 ms)
+      ✓ should return 404 when vehicle does not exist (305 ms)
     POST /api/vehicles
-      √ should allow admin to create vehicle (296 ms)
-      √ should reject request without token (286 ms)
-      √ should reject customer access (313 ms)
-      √ should reject invalid payload (366 ms)
-      √ should reject duplicate vehicle (2593 ms)
+      ✓ should allow admin to create vehicle (296 ms)
+      ✓ should reject request without token (286 ms)
+      ✓ should reject customer access (313 ms)
+      ✓ should reject invalid payload (366 ms)
+      ✓ should reject duplicate vehicle (2593 ms)
     PUT /api/vehicles/:id
-      √ should update vehicle (333 ms)
-      √ should return 404 for invalid id (292 ms)
-      √ should reject customer (311 ms)
-      √ should reject without token (372 ms)
+      ✓ should update vehicle (333 ms)
+      ✓ should return 404 for invalid id (292 ms)
+      ✓ should reject customer (311 ms)
+      ✓ should reject without token (372 ms)
     DELETE /api/vehicles/:id
-      √ should delete vehicle (323 ms)
-      √ should reject customer (299 ms)
-      √ should reject without token (319 ms)
-      √ should return 404 for invalid vehicle (319 ms)
+      ✓ should delete vehicle (323 ms)
+      ✓ should reject customer (299 ms)
+      ✓ should reject without token (319 ms)
+      ✓ should return 404 for invalid vehicle (319 ms)
 
 PASS tests/auth.test.ts
   Authentication API
     POST /api/auth/register
-      √ should register a new user (289 ms)
-      √ should return 409 if email already exists (90 ms)
+      ✓ should register a new user (289 ms)
+      ✓ should return 409 if email already exists (90 ms)
     POST /api/auth/login
-      √ should login successfully (149 ms)
-      √ should return 401 for wrong password (152 ms)
-      √ should return 401 if email does not exist (90 ms)
+      ✓ should login successfully (149 ms)
+      ✓ should return 401 for wrong password (152 ms)
+      ✓ should return 401 if email does not exist (90 ms)
 
 PASS tests/middleware.test.ts
   Authentication Middleware
-    √ should return 401 when authorization header is missing (305 ms)
-    √ should return 401 for invalid token (180 ms)
-    √ should allow access with valid token (238 ms)
+    ✓ should return 401 when authorization header is missing (305 ms)
+    ✓ should return 401 for invalid token (180 ms)
+    ✓ should allow access with valid token (238 ms)
 
 PASS tests/app.test.ts
   Application
     GET /api/health
-      √ should return API health status (8 ms)
+      ✓ should return API health status (8 ms)
 
 PASS tests/authorization.test.ts
   Authorization Middleware
-    √ should deny access without token (9 ms)
+    ✓ should deny access without token (9 ms)
 
 Test Suites: 5 passed, 5 total
 Tests:       26 passed, 26 total
@@ -298,44 +332,29 @@ Ran all test suites.
 
 ### What the Tests Cover
 
-| Test File | Coverage |
+| Test File | What It Validates |
 | --- | --- |
-| `auth.test.ts` | Registration, login, duplicate email rejection |
-| `vehicle.test.ts` | Full CRUD for vehicles, auth guards, admin-only restrictions, duplicate rejection |
-| `middleware.test.ts` | JWT validation, missing token, invalid token |
-| `authorization.test.ts` | Role-based access control enforcement |
-| `app.test.ts` | Application health check |
-
----
-
-## Screenshots
-
-> Screenshots to be added before final submission.
-
-- Login and registration screen
-- Dashboard overview (Admin)
-- Dashboard overview (Customer)
-- Vehicle inventory – grid view (Customer)
-- Vehicle inventory – list view (Admin)
-- Purchase modal
-- Admin add/edit vehicle modal
-- Admin analytics & reports page
+| `auth.test.ts` | Registration success, login success, duplicate email rejection (409), wrong password (401), unknown email (401) |
+| `vehicle.test.ts` | Full CRUD for vehicles, authentication guards on every endpoint, admin-only restrictions, duplicate vehicle rejection, 404 handling |
+| `middleware.test.ts` | JWT validation middleware — missing token, invalid/expired token, valid token |
+| `authorization.test.ts` | Role-based access control — customers blocked from admin endpoints |
+| `app.test.ts` | Application health check endpoint |
 
 ---
 
 ## Documentation for Future Maintenance
 
-See [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md) for a short explanation of the main backend and frontend flows.
+See [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md) for a detailed explanation of the main backend and frontend flows.
 
-Important decisions:
+Important design decisions:
 
-- Vehicle list/search endpoints are protected because the PDF lists Vehicles as protected.
-- `GET /api/vehicles/search` supports make, model, category, `minPrice`, and `maxPrice`.
-- `POST /api/vehicles/:id/purchase` is included to match the PDF endpoint.
+- Vehicle list/search endpoints are protected because the kata PDF lists Vehicles as protected.
+- `GET /api/vehicles/search` supports make, model, category, `minPrice`, and `maxPrice` query params.
+- `POST /api/vehicles/:id/purchase` is included to match the PDF endpoint spec.
 - Existing `POST /api/purchases` is kept for frontend compatibility.
-- Purchase stock decrement uses a Prisma transaction and conditional update to avoid overselling.
+- Purchase stock decrement uses a Prisma transaction and conditional update to prevent overselling.
 - Query validation stores parsed data in `res.locals.validatedQuery` because Express 5 treats `req.query` as read-only.
-- The Admin role selector in the registration form is intentionally exposed for evaluator/demo convenience. In a production system, Admin access would be provisioned server-side only.
+- The Admin role selector in the registration form is intentionally exposed for evaluator convenience. In a production system, Admin access would be provisioned server-side only.
 
 ---
 
@@ -347,13 +366,14 @@ Important decisions:
 
 ### How AI Was Used
 
-- Analyzed the kata PDF and compared it with the existing implementation.
+- Analyzed the kata PDF and compared it against the existing implementation.
 - Built out the full-stack architecture: backend routes, controllers, services, and repositories.
-- Generated the TDD integration test suite (red-green-refactor cycle).
+- Generated the TDD integration test suite following the red-green-refactor cycle.
 - Implemented the React frontend: authentication forms, vehicle catalog, purchase flow, admin reports.
-- Fixed frontend authentication token handling.
+- Fixed frontend authentication token handling and Prisma environment loading.
 - Improved backend validation for body, route params, and query params.
 - Improved purchase logic so stock updates are atomic using Prisma transactions.
+- Automated screenshot capture using Puppeteer.
 - Updated and maintained project documentation (README, PROMPTS.md, implementation notes).
 - Ran verification commands for backend and frontend builds.
 
@@ -378,8 +398,8 @@ The kata requires AI usage transparency. Prompt history is tracked in [PROMPTS.m
 - [x] Role-based access control (Admin / Customer)
 - [x] React/Tailwind SPA (responsive)
 - [x] TDD test suite with 26 passing tests
-- [x] Test report with full output
+- [x] Test report with full execution output
+- [x] Screenshots of every key screen (10 screenshots)
 - [x] My AI Usage section
 - [x] PROMPTS.md with prompt history
-- [ ] Screenshots (to be added before final submission)
 - [ ] Public repository link (to be added after pushing)
