@@ -7,222 +7,124 @@ import { formatCurrency, titleCase } from "../../utils/format";
 
 interface Props {
   vehicles: Vehicle[];
-  onEdit?: (vehicle: Vehicle) => void;
-  onBuy?: (vehicle: Vehicle) => void;
+  onEdit?: (v: Vehicle) => void;
+  onBuy?:  (v: Vehicle) => void;
 }
 
-function stockDot(quantity: number) {
-  if (quantity === 0) return "bg-rose-500";
-  if (quantity <= 3) return "bg-amber-500";
-  return "bg-emerald-500";
-}
-
-function stockBadge(quantity: number) {
-  if (quantity === 0) return "badge-red";
-  if (quantity <= 3) return "badge-amber";
-  return "badge-green";
-}
-
-function stockText(quantity: number) {
-  if (quantity === 0) return "Out of stock";
-  if (quantity <= 3) return `${quantity} – Low`;
-  return `${quantity}`;
+function StockBadge({ qty }: { qty: number }) {
+  if (qty === 0) return <span className="badge-red">Out of stock</span>;
+  if (qty <= 3)  return <span className="badge-amber">{qty} — Low</span>;
+  return <span className="badge-green">{qty} in stock</span>;
 }
 
 export default function VehicleTable({ vehicles, onEdit, onBuy }: Props) {
-  const queryClient = useQueryClient();
+  const qc = useQueryClient();
 
-  const deleteMutation = useMutation({
+  const del = useMutation({
     mutationFn: deleteVehicle,
-    onSuccess: () => {
-      toast.success("Vehicle removed from inventory");
-      queryClient.invalidateQueries({ queryKey: ["vehicles"] });
-    },
-    onError: () => {
-      toast.error("Failed to remove vehicle.");
-    },
+    onSuccess: () => { toast.success("Vehicle removed"); qc.invalidateQueries({ queryKey: ["vehicles"] }); },
+    onError:   () => toast.error("Failed to remove vehicle."),
   });
 
-  const handleDelete = (vehicle: Vehicle) => {
-    if (window.confirm(`Remove ${vehicle.make} ${vehicle.model} from inventory?`)) {
-      deleteMutation.mutate(vehicle.id);
-    }
+  const confirmDelete = (v: Vehicle) => {
+    if (window.confirm(`Remove ${v.make} ${v.model} from inventory?`)) del.mutate(v.id);
   };
 
   return (
     <div className="space-y-3">
+      {/* Mobile cards */}
       <div className="grid gap-3 md:hidden">
-        {vehicles.map((vehicle) => {
-          const isOutOfStock = vehicle.quantity === 0;
-
-          return (
-            <article key={vehicle.id} className="surface p-4">
-              <div className="flex gap-3">
-                {vehicle.imageUrl ? (
-                  <img
-                    src={vehicle.imageUrl}
-                    alt={`${vehicle.make} ${vehicle.model}`}
-                    className="h-20 w-28 shrink-0 rounded-lg border border-slate-200 object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = "none";
-                    }}
-                  />
-                ) : (
-                  <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-300">
-                    <CarFront size={28} />
-                  </div>
+        {vehicles.map((v) => (
+          <div key={v.id} className="card p-4">
+            <div className="flex gap-3">
+              {v.imageUrl ? (
+                <img src={v.imageUrl} alt={`${v.make} ${v.model}`}
+                  className="h-20 w-28 shrink-0 rounded-xl object-cover border border-slate-100"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+              ) : (
+                <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-slate-300">
+                  <CarFront size={26} />
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-slate-900 truncate">{v.make} {v.model}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{titleCase(v.category)} · {v.year}</p>
+                <p className="text-sm font-bold text-slate-900 mt-2">{formatCurrency(v.price)}</p>
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between">
+              <StockBadge qty={v.quantity} />
+              <div className="flex gap-2">
+                {onEdit && (
+                  <>
+                    <button onClick={() => onEdit(v)} className="icon-btn" aria-label="Edit"><Pencil size={14} /></button>
+                    <button onClick={() => confirmDelete(v)} disabled={del.isPending}
+                      className="icon-btn hover:bg-red-50 hover:text-red-600" aria-label="Delete"><Trash2 size={14} /></button>
+                  </>
                 )}
-
-                <div className="min-w-0 flex-1">
-                  <h3 className="truncate text-sm font-bold text-slate-950">
-                    {vehicle.make} {vehicle.model}
-                  </h3>
-                  <p className="mt-1 text-xs font-medium text-slate-500">
-                    {titleCase(vehicle.category)} - {vehicle.year}
-                  </p>
-                  <p className="mt-2 text-base font-bold text-slate-950">
-                    {formatCurrency(vehicle.price)}
-                  </p>
-                </div>
+                {onBuy && (
+                  <button onClick={() => onBuy(v)} disabled={v.quantity === 0} className="btn-primary px-3 py-1.5 text-xs">
+                    <ShoppingCart size={13} /> {v.quantity === 0 ? "Out of stock" : "Purchase"}
+                  </button>
+                )}
               </div>
-
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <span className={stockBadge(vehicle.quantity)}>
-                    <span className={`inline-block h-1.5 w-1.5 rounded-full ${stockDot(vehicle.quantity)}`} />
-                    {stockText(vehicle.quantity)}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {onEdit && (
-                    <>
-                      <button
-                        onClick={() => onEdit(vehicle)}
-                        className="icon-button"
-                        aria-label={`Edit ${vehicle.make} ${vehicle.model}`}
-                      >
-                        <Pencil size={15} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(vehicle)}
-                        disabled={deleteMutation.isPending}
-                        className="icon-button hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
-                        aria-label={`Delete ${vehicle.make} ${vehicle.model}`}
-                      >
-                        <Trash2 size={15} />
-                      </button>
-                    </>
-                  )}
-
-                  {onBuy && (
-                    <button
-                      onClick={() => onBuy(vehicle)}
-                      disabled={isOutOfStock}
-                      className="btn-primary px-3 py-2 text-xs"
-                    >
-                      <ShoppingCart size={14} />
-                      {isOutOfStock ? "Sold out" : "Buy"}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </article>
-          );
-        })}
+            </div>
+          </div>
+        ))}
       </div>
 
-      <div className="surface-elevated hidden overflow-hidden md:block">
+      {/* Desktop table */}
+      <div className="hidden md:block card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">
+          <table className="min-w-full text-sm">
+            <thead className="border-b border-slate-100 bg-slate-50/70">
               <tr>
-                <th className="px-5 py-3">Vehicle</th>
-                <th className="px-5 py-3">Category</th>
-                <th className="px-5 py-3">Year</th>
-                <th className="px-5 py-3">Price</th>
-                <th className="px-5 py-3">Stock</th>
-                <th className="px-5 py-3 text-right">Actions</th>
+                {["Vehicle", "Category", "Year", "Price", "Stock", "Actions"].map(h => (
+                  <th key={h} className={`px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500 ${h === "Actions" ? "text-right" : "text-left"}`}>
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
-              {vehicles.map((vehicle) => {
-                const isOutOfStock = vehicle.quantity === 0;
-
-                return (
-                  <tr key={vehicle.id} className="transition hover:bg-slate-50/70">
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        {vehicle.imageUrl ? (
-                          <img
-                            src={vehicle.imageUrl}
-                            alt={`${vehicle.make} ${vehicle.model}`}
-                            className="h-11 w-16 rounded-lg border border-slate-200 object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = "none";
-                            }}
-                          />
-                        ) : (
-                          <div className="flex h-11 w-16 items-center justify-center rounded-lg border border-slate-200 bg-slate-50 text-slate-300">
-                            <CarFront size={22} />
-                          </div>
-                        )}
-                        <p className="font-bold text-slate-950">
-                          {vehicle.make} {vehicle.model}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 font-medium text-slate-600">
-                      {titleCase(vehicle.category)}
-                    </td>
-                    <td className="px-5 py-4 font-medium text-slate-600">
-                      {vehicle.year}
-                    </td>
-                    <td className="px-5 py-4 font-bold text-slate-950">
-                      {formatCurrency(vehicle.price)}
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className={stockBadge(vehicle.quantity)}>
-                        <span className={`inline-block h-1.5 w-1.5 rounded-full ${stockDot(vehicle.quantity)}`} />
-                        {stockText(vehicle.quantity)}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        {onEdit && (
-                          <>
-                            <button
-                              onClick={() => onEdit(vehicle)}
-                              className="icon-button"
-                              aria-label={`Edit ${vehicle.make} ${vehicle.model}`}
-                            >
-                              <Pencil size={15} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(vehicle)}
-                              disabled={deleteMutation.isPending}
-                              className="icon-button hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
-                              aria-label={`Delete ${vehicle.make} ${vehicle.model}`}
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          </>
-                        )}
-                        {onBuy && (
-                          <button
-                            onClick={() => onBuy(vehicle)}
-                            disabled={isOutOfStock}
-                            className="btn-primary px-3 py-2 text-xs"
-                          >
-                            <ShoppingCart size={14} />
-                            {isOutOfStock ? "Sold out" : "Buy"}
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+            <tbody className="divide-y divide-slate-50">
+              {vehicles.map((v) => (
+                <tr key={v.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-3">
+                      {v.imageUrl ? (
+                        <img src={v.imageUrl} alt={`${v.make} ${v.model}`}
+                          className="h-10 w-14 shrink-0 rounded-lg object-cover border border-slate-100"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                      ) : (
+                        <div className="flex h-10 w-14 shrink-0 items-center justify-center rounded-lg border border-slate-100 bg-slate-50 text-slate-300">
+                          <CarFront size={18} />
+                        </div>
+                      )}
+                      <span className="font-semibold text-slate-900">{v.make} {v.model}</span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3.5 text-slate-600">{titleCase(v.category)}</td>
+                  <td className="px-5 py-3.5 text-slate-600">{v.year}</td>
+                  <td className="px-5 py-3.5 font-semibold text-slate-900">{formatCurrency(v.price)}</td>
+                  <td className="px-5 py-3.5"><StockBadge qty={v.quantity} /></td>
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center justify-end gap-1.5">
+                      {onEdit && (
+                        <>
+                          <button onClick={() => onEdit(v)} className="icon-btn" aria-label="Edit"><Pencil size={14} /></button>
+                          <button onClick={() => confirmDelete(v)} disabled={del.isPending}
+                            className="icon-btn hover:bg-red-50 hover:text-red-600" aria-label="Delete"><Trash2 size={14} /></button>
+                        </>
+                      )}
+                      {onBuy && (
+                        <button onClick={() => onBuy(v)} disabled={v.quantity === 0} className="btn-primary px-3 py-1.5 text-xs">
+                          <ShoppingCart size={13} /> {v.quantity === 0 ? "Sold out" : "Purchase"}
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

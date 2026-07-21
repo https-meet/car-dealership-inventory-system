@@ -1,8 +1,18 @@
+import "dotenv/config";
 import app from "./app";
-// console.log("Imported app =", app);
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on http://localhost:${PORT}`);
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server running → http://localhost:${PORT}`);
+});
+
+// Keep process alive; log unhandled errors clearly
+server.on("error", (err) => {
+  console.error("Server error:", err);
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled rejection:", reason);
 });

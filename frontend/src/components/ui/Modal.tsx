@@ -49,7 +49,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
           </h2>
           <button
             onClick={onClose}
-            className="icon-button"
+            className="icon-btn"
             aria-label="Close modal"
           >
             <X size={18} />
